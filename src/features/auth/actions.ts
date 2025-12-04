@@ -24,7 +24,8 @@ export async function login(formData: FormData) {
   });
 
   if (error) {
-    return { error: "로그인 실패: 이메일 또는 비밀번호를 확인하세요." };
+    console.error("Login failed:", error.message);
+    return { error: error.message };
   }
 
   redirect("/admin");
