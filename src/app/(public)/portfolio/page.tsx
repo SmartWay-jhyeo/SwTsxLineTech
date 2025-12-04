@@ -1,78 +1,38 @@
-"use client";
-
-import { useState } from "react";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { CategoryFilter } from "@/features/portfolio/components/CategoryFilter";
 import { ProjectCard } from "@/features/portfolio/components/ProjectCard";
+import { createClient } from "@/lib/supabase/server";
 
 type Category = "all" | "lane" | "epoxy" | "paint";
 
-// 임시 데이터
-const mockProjects = [
-  {
-    id: "1",
-    title: "아파트 지하주차장 차선도색",
-    category: "lane" as const,
-    location: "서울 강남구",
-    date: "2024.11",
-    area: 3500,
-    imageUrl: "/images/bg-lane.jpg",
-  },
-  {
-    id: "2",
-    title: "물류창고 에폭시 바닥공사",
-    category: "epoxy" as const,
-    location: "경기 평택시",
-    date: "2024.10",
-    area: 5000,
-    imageUrl: "/images/bg-epoxy.jpg",
-  },
-  {
-    id: "3",
-    title: "상가건물 외벽 도장공사",
-    category: "paint" as const,
-    location: "인천 남동구",
-    date: "2024.09",
-    area: 2200,
-    imageUrl: "/images/bg-paint.jpg",
-  },
-  {
-    id: "4",
-    title: "공장 주차장 라인도색",
-    category: "lane" as const,
-    location: "경기 화성시",
-    date: "2024.08",
-    area: 1800,
-    imageUrl: "/images/bg-lane.jpg",
-  },
-  {
-    id: "5",
-    title: "체육관 바닥 우레탄 방수",
-    category: "epoxy" as const,
-    location: "서울 송파구",
-    date: "2024.07",
-    area: 1200,
-    imageUrl: "/images/bg-epoxy.jpg",
-  },
-  {
-    id: "6",
-    title: "아파트 계단실 도장",
-    category: "paint" as const,
-    location: "서울 마포구",
-    date: "2024.06",
-    area: 800,
-    imageUrl: "/images/bg-paint.jpg",
-  },
-];
+export default async function Page({
+  searchParams,
+}: {
+  searchParams: Promise<{ category?: string }>;
+}) {
+  // searchParams.category 가져오기 (없으면 'all')
+  const { category } = await searchParams;
+  const selectedCategory = (category as Category) || "all";
 
-export default function Page() {
-  const [selectedCategory, setSelectedCategory] = useState<Category>("all");
+  // Supabase에서 데이터 가져오기
+  const supabase = await createClient();
+  
+  let query = supabase
+    .from("portfolio_items")
+    .select("*")
+    .order("date", { ascending: false });
 
-  const filteredProjects =
-    selectedCategory === "all"
-      ? mockProjects
-      : mockProjects.filter((project) => project.category === selectedCategory);
+  if (selectedCategory !== "all") {
+    query = query.eq("category", selectedCategory);
+  }
+
+  const { data: projects, error } = await query;
+
+  if (error) {
+    console.error("Error fetching portfolio items:", error);
+    return <div>데이터를 불러오는 중 오류가 발생했습니다.</div>;
+  }
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -97,29 +57,26 @@ export default function Page() {
 
         {/* Category Filter */}
         <div className="mb-10">
-          <CategoryFilter
-            selectedCategory={selectedCategory}
-            onCategoryChange={setSelectedCategory}
-          />
+          <CategoryFilter />
         </div>
 
         {/* Project Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredProjects.map((project) => (
+          {projects?.map((project) => (
             <ProjectCard
               key={project.id}
               title={project.title}
-              category={project.category}
+              category={project.category as Category} // Type assertion
               location={project.location}
               date={project.date}
               area={project.area}
-              imageUrl={project.imageUrl}
+              imageUrl={project.image_url} // DB column name matches
             />
           ))}
         </div>
 
         {/* Empty State */}
-        {filteredProjects.length === 0 && (
+        {projects?.length === 0 && (
           <div className="text-center py-20 text-muted-foreground">
             해당 카테고리의 시공 실적이 없습니다.
           </div>
