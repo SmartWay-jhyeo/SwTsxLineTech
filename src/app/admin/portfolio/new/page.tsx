@@ -102,7 +102,7 @@ export default function NewPortfolioPage() {
                 name="title"
                 required
                 placeholder="예: 강남구 아파트 지하주차장 차선도색"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary/50"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary/50 text-gray-900"
               />
             </div>
 
@@ -114,7 +114,7 @@ export default function NewPortfolioPage() {
               <select
                 name="category"
                 required
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary/50 bg-white"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary/50 bg-white text-gray-900"
               >
                 <option value="">선택하세요</option>
                 <option value="lane">차선/주차선</option>
@@ -133,7 +133,7 @@ export default function NewPortfolioPage() {
                 name="date"
                 required
                 placeholder="예: 2024.11"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary/50"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary/50 text-gray-900"
               />
             </div>
 
@@ -147,7 +147,7 @@ export default function NewPortfolioPage() {
                 name="location"
                 required
                 placeholder="예: 서울 강남구"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary/50"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary/50 text-gray-900"
               />
             </div>
 
@@ -161,7 +161,7 @@ export default function NewPortfolioPage() {
                 name="area"
                 required
                 placeholder="예: 3500"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary/50"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary/50 text-gray-900"
               />
             </div>
           </div>
