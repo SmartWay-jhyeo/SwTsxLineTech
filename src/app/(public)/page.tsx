@@ -1,5 +1,4 @@
 import { ServicePanel } from "@/components/shared/ServicePanel";
-import { Header } from "@/components/shared/Header";
 
 const services = [
   {
@@ -25,23 +24,20 @@ const services = [
   },
 ];
 
-export function HomePage() {
+export function LandingPage() {
   return (
-    <>
-      <Header />
-      <div className="h-screen w-full flex flex-col md:flex-row bg-background">
-        {services.map((service) => (
-          <ServicePanel
-            key={service.id}
-            title={service.title}
-            backgroundImage={service.backgroundImage}
-            portfolioLink={service.portfolioLink}
-            quoteLink={service.quoteLink}
-          />
-        ))}
-      </div>
-    </>
+    <div className="h-screen w-full flex flex-col md:flex-row bg-background">
+      {services.map((service) => (
+        <ServicePanel
+          key={service.id}
+          title={service.title}
+          backgroundImage={service.backgroundImage}
+          portfolioLink={service.portfolioLink}
+          quoteLink={service.quoteLink}
+        />
+      ))}
+    </div>
   );
 }
 
-export default HomePage;
+export default LandingPage;
