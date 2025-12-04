@@ -89,12 +89,12 @@ declare namespace kakao.maps {
     function addListener(
       target: Map | Marker | Polygon,
       type: string,
-      callback: (mouseEvent?: MouseEvent) => void
+      callback: (mouseEvent: MouseEvent) => void
     ): void;
     function removeListener(
       target: Map | Marker | Polygon,
       type: string,
-      callback: (mouseEvent?: MouseEvent) => void
+      callback: (mouseEvent: MouseEvent) => void
     ): void;
   }
 
