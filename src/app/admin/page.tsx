@@ -74,7 +74,12 @@ export default async function AdminDashboard() {
                   </td>
                   <td className="px-6 py-4 text-gray-500">{item.date}</td>
                   <td className="px-6 py-4 text-right">
-                    <form action={deletePortfolioItem.bind(null, item.id, item.image_url)}>
+                    <form
+                      action={async () => {
+                        "use server";
+                        await deletePortfolioItem(item.id, item.image_url);
+                      }}
+                    >
                       <Button
                         variant="ghost"
                         size="icon"
