@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, ReactNode } from "react";
+import Image from "next/image";
 import { X, ChevronRight, ChevronLeft, Search, MapPin, Calculator, ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -11,6 +12,7 @@ type TourStep = {
   title: string;
   description: string;
   icon: ReactNode;
+  image?: string;
 };
 
 const tourSteps: TourStep[] = [
@@ -19,12 +21,14 @@ const tourSteps: TourStep[] = [
     title: "주소 검색하기",
     description: "먼저 시공할 위치의 주소를 검색해주세요. 정확한 위치를 찾아드립니다.",
     icon: <Search size={28} />,
+    image: "/images/manual-address.gif",
   },
   {
     id: 2,
     title: "지도에서 영역 그리기",
     description: "주차장 영역의 꼭지점을 클릭하여 면적을 측정해주세요. 클릭할 때마다 점이 추가됩니다.",
     icon: <MapPin size={28} />,
+    image: "/images/manual-region.gif",
   },
   {
     id: 3,
@@ -122,12 +126,25 @@ export function TourGuide({ onComplete }: TourGuideProps) {
             ))}
           </div>
 
-          {/* Icon */}
-          <div className="flex justify-center mb-4">
-            <div className="w-20 h-20 bg-primary/20 rounded-full flex items-center justify-center text-primary animate-pulse">
-              {step.icon}
+          {/* Image or Icon */}
+          {step.image ? (
+            <div className="mb-4 rounded-lg overflow-hidden border border-white/10">
+              <Image
+                src={step.image}
+                alt={step.title}
+                width={360}
+                height={200}
+                className="w-full h-auto"
+                unoptimized
+              />
             </div>
-          </div>
+          ) : (
+            <div className="flex justify-center mb-4">
+              <div className="w-20 h-20 bg-primary/20 rounded-full flex items-center justify-center text-primary animate-pulse">
+                {step.icon}
+              </div>
+            </div>
+          )}
 
           {/* Content */}
           <div className="text-center mb-4">
