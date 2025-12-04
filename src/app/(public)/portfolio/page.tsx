@@ -66,7 +66,7 @@ const mockProjects = [
   },
 ];
 
-export function PortfolioPage() {
+export default function Page() {
   const [selectedCategory, setSelectedCategory] = useState<Category>("all");
 
   const filteredProjects =
@@ -128,5 +128,3 @@ export function PortfolioPage() {
     </div>
   );
 }
-
-export default PortfolioPage;
