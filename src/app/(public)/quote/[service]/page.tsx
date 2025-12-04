@@ -49,7 +49,7 @@ export async function QuotePage({ params }: QuotePageProps) {
       {/* Content */}
       <div className="container mx-auto px-6 py-12">
         {/* Title */}
-        <h1 className="text-3xl font-bold text-center mb-4">견적 계산히기</h1>
+        <h1 className="text-3xl font-bold text-center mb-4">{serviceName} 견적 계산하기</h1>
         <p className="text-center text-muted-foreground mb-10 max-w-xl mx-auto">
           {serviceDescription}
         </p>

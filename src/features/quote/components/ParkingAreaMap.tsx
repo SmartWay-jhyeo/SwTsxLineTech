@@ -141,6 +141,7 @@ export function ParkingAreaMap({ onAreaChange, onAddressChange }: ParkingAreaMap
     };
 
     initMap();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // 주소 검색
