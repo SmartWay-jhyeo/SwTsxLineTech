@@ -1,12 +1,11 @@
 import Image from "next/image";
 import { MapPin, Calendar, Ruler } from "lucide-react";
 import { cn } from "@/lib/utils";
-
-type Category = "lane" | "epoxy" | "paint";
+import { ServiceType } from "@/types";
 
 type ProjectCardProps = {
   title: string;
-  category: Category;
+  category: ServiceType;
   location: string;
   date: string;
   area: number;
@@ -14,13 +13,13 @@ type ProjectCardProps = {
   className?: string;
 };
 
-const categoryLabels: Record<Category, string> = {
+const categoryLabels: Record<ServiceType, string> = {
   lane: "차선/주차선",
   epoxy: "바닥 에폭시",
   paint: "도장공사",
 };
 
-const categoryColors: Record<Category, string> = {
+const categoryColors: Record<ServiceType, string> = {
   lane: "bg-primary",
   epoxy: "bg-primary",
   paint: "bg-primary",

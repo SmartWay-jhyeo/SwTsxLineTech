@@ -2,10 +2,9 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { cn } from "@/lib/utils";
+import { PortfolioCategory } from "@/types";
 
-type Category = "all" | "lane" | "epoxy" | "paint";
-
-const categories: { id: Category; label: string }[] = [
+const categories: { id: PortfolioCategory; label: string }[] = [
   { id: "all", label: "전체" },
   { id: "lane", label: "차선/주차선" },
   { id: "epoxy", label: "바닥 에폭시" },
@@ -15,9 +14,9 @@ const categories: { id: Category; label: string }[] = [
 export function CategoryFilter() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const selectedCategory = (searchParams.get("category") as Category) || "all";
+  const selectedCategory = (searchParams.get("category") as PortfolioCategory) || "all";
 
-  const handleCategoryChange = (category: Category) => {
+  const handleCategoryChange = (category: PortfolioCategory) => {
     const params = new URLSearchParams(searchParams.toString());
     if (category === "all") {
       params.delete("category");

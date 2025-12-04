@@ -3,8 +3,7 @@ import { ArrowLeft } from "lucide-react";
 import { CategoryFilter } from "@/features/portfolio/components/CategoryFilter";
 import { ProjectCard } from "@/features/portfolio/components/ProjectCard";
 import { createClient } from "@/lib/supabase/server";
-
-type Category = "all" | "lane" | "epoxy" | "paint";
+import { ServiceType, PortfolioCategory } from "@/types";
 
 export default async function Page({
   searchParams,
@@ -13,7 +12,7 @@ export default async function Page({
 }) {
   // searchParams.category 가져오기 (없으면 'all')
   const { category } = await searchParams;
-  const selectedCategory = (category as Category) || "all";
+  const selectedCategory = (category as PortfolioCategory) || "all";
 
   // Supabase에서 데이터 가져오기
   const supabase = await createClient();
@@ -66,7 +65,7 @@ export default async function Page({
             <ProjectCard
               key={project.id}
               title={project.title}
-              category={project.category as Category} // Type assertion
+              category={project.category as ServiceType} // Type assertion to unified ServiceType
               location={project.location}
               date={project.date}
               area={project.area}
