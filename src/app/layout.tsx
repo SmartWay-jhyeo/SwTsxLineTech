@@ -15,7 +15,7 @@ export const metadata: Metadata = {
   description: "차선/주차선, 바닥 에폭시, 우레탄방수, 내/외부 도장 전문 시공업체",
 };
 
-export function RootLayout({
+export default function Layout({
   children,
 }: Readonly<{
   children: React.ReactNode;
@@ -34,5 +34,3 @@ export function RootLayout({
     </html>
   );
 }
-
-export default RootLayout;

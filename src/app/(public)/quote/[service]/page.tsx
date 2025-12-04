@@ -22,7 +22,7 @@ const serviceDescriptions: Record<string, string> = {
   paint: "도장 종류와 색상을 선택하고 견적을 받아보세요",
 };
 
-export async function QuotePage({ params }: QuotePageProps) {
+export default async function Page({ params }: QuotePageProps) {
   const { service } = await params;
   const serviceName = serviceNames[service] || "서비스";
   const serviceDescription = serviceDescriptions[service] || "견적을 받아보세요";
@@ -62,5 +62,3 @@ export async function QuotePage({ params }: QuotePageProps) {
     </div>
   );
 }
-
-export default QuotePage;

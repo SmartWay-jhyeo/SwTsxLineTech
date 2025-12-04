@@ -25,7 +25,7 @@ const services = [
   },
 ];
 
-export function HomePage() {
+export default function Page() {
   return (
     <>
       <Header />
@@ -43,5 +43,3 @@ export function HomePage() {
     </>
   );
 }
-
-export default HomePage;

@@ -24,7 +24,7 @@ const services = [
   },
 ];
 
-export function LandingPage() {
+export default function Page() {
   return (
     <div className="h-screen w-full flex flex-col md:flex-row bg-background">
       {services.map((service) => (
@@ -39,5 +39,3 @@ export function LandingPage() {
     </div>
   );
 }
-
-export default LandingPage;
