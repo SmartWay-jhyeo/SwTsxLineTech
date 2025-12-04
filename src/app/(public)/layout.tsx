@@ -4,7 +4,7 @@ type PublicLayoutProps = {
   children: React.ReactNode;
 };
 
-export function PublicLayout({ children }: PublicLayoutProps) {
+export default function Layout({ children }: PublicLayoutProps) {
   return (
     <>
       <Header />
@@ -12,5 +12,3 @@ export function PublicLayout({ children }: PublicLayoutProps) {
     </>
   );
 }
-
-export default PublicLayout;
