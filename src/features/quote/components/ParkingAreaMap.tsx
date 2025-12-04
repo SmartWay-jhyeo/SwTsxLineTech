@@ -130,6 +130,10 @@ export function ParkingAreaMap({ onAreaChange, onAddressChange }: ParkingAreaMap
           mapRef.current = map;
           setIsMapLoaded(true);
 
+          // 지도 로드 시 바로 그리기 모드 활성화
+          isDrawingRef.current = true;
+          setIsDrawing(true);
+
           // 지도 클릭 이벤트
           window.kakao.maps.event.addListener(map, "click", (mouseEvent: kakao.maps.MouseEvent) => {
             addPoint(mouseEvent.latLng);
@@ -170,7 +174,7 @@ export function ParkingAreaMap({ onAreaChange, onAddressChange }: ParkingAreaMap
     });
   };
 
-  // 초기화
+  // 초기화 (그리기 모드는 유지)
   const handleReset = () => {
     markersRef.current.forEach((marker) => marker.setMap(null));
     markersRef.current = [];
@@ -184,13 +188,7 @@ export function ParkingAreaMap({ onAreaChange, onAddressChange }: ParkingAreaMap
     setPointCount(0);
     setCalculatedArea(0);
     onAreaChange(0);
-    isDrawingRef.current = false;
-    setIsDrawing(false);
-  };
-
-  // 그리기 시작
-  const handleStartDrawing = () => {
-    handleReset();
+    // 그리기 모드 유지
     isDrawingRef.current = true;
     setIsDrawing(true);
   };
@@ -235,11 +233,11 @@ export function ParkingAreaMap({ onAreaChange, onAddressChange }: ParkingAreaMap
         )}
 
         {/* 안내 오버레이 */}
-        {isMapLoaded && !isDrawing && pointCount === 0 && (
+        {isMapLoaded && pointCount === 0 && (
           <div className="absolute inset-0 flex items-center justify-center bg-black/40 rounded-lg pointer-events-none">
             <div className="text-center">
               <MapPin className="mx-auto mb-2 text-primary" size={32} />
-              <p className="text-white text-sm">주소 검색 후 영역을 그려주세요</p>
+              <p className="text-white text-sm">지도를 클릭하여 영역을 그려주세요</p>
             </div>
           </div>
         )}
@@ -248,32 +246,21 @@ export function ParkingAreaMap({ onAreaChange, onAddressChange }: ParkingAreaMap
       {/* 컨트롤 버튼 */}
       <div className="flex items-center justify-between">
         <div className="flex gap-2">
-          {!isDrawing ? (
-            <button
-              type="button"
-              onClick={handleStartDrawing}
-              disabled={!isMapLoaded}
-              className="flex items-center gap-2 px-3 py-2 bg-primary/20 border border-primary rounded-lg text-primary text-sm hover:bg-primary/30 transition-colors disabled:opacity-50"
-            >
-              <MapPin size={16} />
-              영역 그리기 시작
-            </button>
-          ) : (
-            <div className="flex items-center gap-2 px-3 py-2 bg-green-500/20 border border-green-500 rounded-lg text-green-400 text-sm">
-              <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-              지도를 클릭하여 꼭지점을 찍으세요 ({pointCount}점)
-            </div>
-          )}
-
           {pointCount > 0 && (
-            <button
-              type="button"
-              onClick={handleReset}
-              className="flex items-center gap-2 px-3 py-2 bg-white/10 rounded-lg text-white/70 text-sm hover:bg-white/20 transition-colors"
-            >
-              <RotateCcw size={16} />
-              초기화
-            </button>
+            <>
+              <div className="flex items-center gap-2 px-3 py-2 bg-green-500/20 border border-green-500 rounded-lg text-green-400 text-sm">
+                <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+                {pointCount}점 선택됨
+              </div>
+              <button
+                type="button"
+                onClick={handleReset}
+                className="flex items-center gap-2 px-3 py-2 bg-white/10 rounded-lg text-white/70 text-sm hover:bg-white/20 transition-colors"
+              >
+                <RotateCcw size={16} />
+                초기화
+              </button>
+            </>
           )}
         </div>
 
