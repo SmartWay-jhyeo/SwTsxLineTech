@@ -49,23 +49,22 @@ export function ServicePanel({
           {title}
         </h2>
 
-        {/* Buttons */}
-          <div className="flex gap-4 pt-4">
-            <Button
-              asChild
-              variant="outline"
-              className="border-white text-white hover:bg-white hover:text-black bg-transparent h-12 px-6 text-base font-medium"
-            >
-              <Link href={portfolioLink}>시공 사례 보기</Link>
-            </Button>
-            <Button
-              asChild
-              className="bg-primary hover:bg-primary/90 text-white h-12 px-6 text-base font-medium"
-            >
-              <Link href={quoteLink}>견적 내기</Link>
-            </Button>
-          </div>
-      </div>
+                {/* Buttons */}
+                <div className="flex flex-col gap-4 w-[158px] pt-4">
+                  <Button
+                    asChild
+                    variant="outline"
+                    className="border-white text-white hover:bg-white hover:text-black bg-transparent h-12 px-6 text-base font-medium"
+                  >
+                    <Link href={portfolioLink}>시공 사례 보기</Link>
+                  </Button>
+                  <Button
+                    asChild
+                    className="bg-primary hover:bg-primary/90 text-white h-12 px-6 text-base font-medium"
+                  >
+                    <Link href={quoteLink}>견적 내기</Link>
+                  </Button>
+                </div>      </div>
     </div>
   );
 }
