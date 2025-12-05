@@ -10,12 +10,15 @@ import {
   COLORS,
   MATERIAL_IMAGES,
   SELF_LEVELING,
+  FLOOR_CONDITIONS,
+  MATERIAL_OPTIONS_CONFIG,
   getFinishesForMaterial,
   getColorsForMaterial,
   requiresColorMixingFee,
   type MaterialId,
   type FinishId,
   type ColorId,
+  type FloorConditionId,
 } from "../data/floorMaterials";
 
 export function EpoxyQuoteForm() {
@@ -24,6 +27,7 @@ export function EpoxyQuoteForm() {
   const [selectedFinish, setSelectedFinish] = useState<FinishId | null>(null);
   const [selectedColor, setSelectedColor] = useState<ColorId | null>(null);
   const [includeSelfLeveling, setIncludeSelfLeveling] = useState(false);
+  const [floorCondition, setFloorCondition] = useState<FloorConditionId | null>(null);
 
   // 연락처 정보
   const [contactData, setContactData] = useState({
@@ -37,12 +41,27 @@ export function EpoxyQuoteForm() {
   // 이미지 갤러리 스크롤 ref
   const galleryRef = useRef<HTMLDivElement>(null);
 
-  // 마감재가 변경되면 광택/색상 초기화
+  // 마감재가 변경되면 광택/색상/옵션 초기화
   const handleMaterialChange = (materialId: MaterialId) => {
     setSelectedMaterial(materialId);
     setSelectedFinish(null);
     setSelectedColor(null);
+    setFloorCondition(null);
+
+    // 마감재별 셀프레벨링 기본값 설정
+    const config = MATERIAL_OPTIONS_CONFIG[materialId];
+    if (config.selfLeveling === "default_checked") {
+      setIncludeSelfLeveling(true);
+    } else {
+      setIncludeSelfLeveling(false);
+    }
   };
+
+  // 현재 마감재의 옵션 설정
+  const currentOptionsConfig = useMemo(() => {
+    if (!selectedMaterial) return null;
+    return MATERIAL_OPTIONS_CONFIG[selectedMaterial];
+  }, [selectedMaterial]);
 
   // 선택된 마감재에 맞는 광택 옵션
   const availableFinishes = useMemo(() => {
@@ -92,6 +111,11 @@ export function EpoxyQuoteForm() {
       alert("색상을 선택해주세요.");
       return;
     }
+    // 칼라 에폭시는 바닥 상태 필수
+    if (currentOptionsConfig?.showFloorCondition && !floorCondition) {
+      alert("바닥 상태를 선택해주세요.");
+      return;
+    }
     if (!contactData.phone) {
       alert("연락처를 입력해주세요.");
       return;
@@ -100,6 +124,7 @@ export function EpoxyQuoteForm() {
     const material = FLOOR_MATERIALS.find(m => m.id === selectedMaterial);
     const finish = selectedFinish ? FINISHES[selectedFinish] : null;
     const color = selectedColor ? COLORS[selectedColor] : null;
+    const condition = floorCondition ? FLOOR_CONDITIONS[floorCondition] : null;
 
     const quoteData = {
       serviceType: "epoxy",
@@ -108,6 +133,8 @@ export function EpoxyQuoteForm() {
       color: color?.name,
       colorMixingFee: needsColorMixingFee,
       selfLeveling: includeSelfLeveling,
+      floorCondition: condition?.name,
+      applicationMethod: condition?.method,
       ...contactData,
     };
 
@@ -321,35 +348,86 @@ export function EpoxyQuoteForm() {
         </section>
       )}
 
-      {/* 5. 셀프레벨링 체크박스 */}
-      <section className="space-y-3">
-        <label className="flex items-start gap-3 p-4 bg-white/5 rounded-lg border border-white/10 cursor-pointer hover:border-white/20 transition-colors">
-          <input
-            type="checkbox"
-            checked={includeSelfLeveling}
-            onChange={(e) => setIncludeSelfLeveling(e.target.checked)}
-            className="mt-0.5 w-5 h-5 rounded border-white/30 bg-transparent text-primary focus:ring-primary focus:ring-offset-0"
-          />
-          <div className="flex-1">
-            <div className="flex items-center gap-3">
-              <span className="text-white text-sm font-medium">{SELF_LEVELING.name}</span>
-              <span className="text-xs text-white/50 px-2 py-0.5 bg-white/10 rounded">선택</span>
-            </div>
-            <p className="text-white/60 text-xs mt-1">{SELF_LEVELING.description}</p>
+      {/* 5. 바닥 상태 (칼라 에폭시 전용) */}
+      {selectedMaterial && currentOptionsConfig?.showFloorCondition && (
+        <section className="space-y-3">
+          <h3 className="text-white text-sm font-medium">바닥 상태</h3>
+          <div className="space-y-2">
+            {(Object.entries(FLOOR_CONDITIONS) as [FloorConditionId, typeof FLOOR_CONDITIONS[FloorConditionId]][]).map(([id, condition]) => (
+              <label
+                key={id}
+                className={cn(
+                  "flex items-start gap-3 p-4 rounded-lg border cursor-pointer transition-all",
+                  floorCondition === id
+                    ? "bg-primary/10 border-primary"
+                    : "bg-white/5 border-white/10 hover:border-white/20"
+                )}
+              >
+                <input
+                  type="radio"
+                  name="floorCondition"
+                  checked={floorCondition === id}
+                  onChange={() => setFloorCondition(id)}
+                  className="mt-0.5 w-4 h-4 text-primary focus:ring-primary focus:ring-offset-0"
+                />
+                <div className="flex-1">
+                  <span className="text-white text-sm font-medium">{condition.name}</span>
+                  <p className="text-white/60 text-xs mt-0.5">{condition.description}</p>
+                  <p className="text-primary text-xs mt-1">→ {condition.method}</p>
+                </div>
+              </label>
+            ))}
           </div>
-          <div className="relative w-16 h-12 rounded overflow-hidden shrink-0">
-            <Image
-              src={SELF_LEVELING.thumbnail}
-              alt={SELF_LEVELING.name}
-              fill
-              className="object-cover"
-              sizes="64px"
-            />
-          </div>
-        </label>
-      </section>
+        </section>
+      )}
 
-      {/* 6. 연락처 정보 */}
+      {/* 6. 셀프레벨링 (투명 에폭시: 기본 체크+권장, 콩자갈/우레탄: 선택, 칼라 에폭시: 숨김) */}
+      {selectedMaterial && currentOptionsConfig?.selfLeveling !== "hidden" && (
+        <section className="space-y-3">
+          <label className={cn(
+            "flex items-start gap-3 p-4 rounded-lg border cursor-pointer transition-colors",
+            currentOptionsConfig?.selfLeveling === "default_checked"
+              ? "bg-primary/10 border-primary/50"
+              : "bg-white/5 border-white/10 hover:border-white/20"
+          )}>
+            <input
+              type="checkbox"
+              checked={includeSelfLeveling}
+              onChange={(e) => setIncludeSelfLeveling(e.target.checked)}
+              className="mt-0.5 w-5 h-5 rounded border-white/30 bg-transparent text-primary focus:ring-primary focus:ring-offset-0"
+            />
+            <div className="flex-1">
+              <div className="flex items-center gap-2">
+                <span className="text-white text-sm font-medium">{SELF_LEVELING.name}</span>
+                {currentOptionsConfig?.selfLeveling === "default_checked" ? (
+                  <span className="text-xs text-primary px-2 py-0.5 bg-primary/20 rounded font-medium">권장</span>
+                ) : (
+                  <span className="text-xs text-white/50 px-2 py-0.5 bg-white/10 rounded">선택</span>
+                )}
+              </div>
+              <p className="text-white/60 text-xs mt-1">{SELF_LEVELING.description}</p>
+              {/* 권장 안내 문구 */}
+              {currentOptionsConfig?.selfLevelingNote && (
+                <div className="flex items-start gap-1.5 mt-2 text-primary">
+                  <AlertCircle size={12} className="shrink-0 mt-0.5" />
+                  <p className="text-xs">{currentOptionsConfig.selfLevelingNote}</p>
+                </div>
+              )}
+            </div>
+            <div className="relative w-16 h-12 rounded overflow-hidden shrink-0">
+              <Image
+                src={SELF_LEVELING.thumbnail}
+                alt={SELF_LEVELING.name}
+                fill
+                className="object-cover"
+                sizes="64px"
+              />
+            </div>
+          </label>
+        </section>
+      )}
+
+      {/* 7. 연락처 정보 */}
       <section className="space-y-3">
         <h3 className="text-white text-sm font-medium">시공 정보</h3>
         <div className="space-y-3">
@@ -396,7 +474,7 @@ export function EpoxyQuoteForm() {
         </div>
       </section>
 
-      {/* 7. 제출 버튼 */}
+      {/* 8. 제출 버튼 */}
       <button
         type="button"
         onClick={handleSubmit}

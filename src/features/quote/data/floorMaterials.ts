@@ -165,6 +165,54 @@ export const SELF_LEVELING = {
   thumbnail: "/images/epoxy/셀프레벨링.jpg"
 };
 
+// 바닥 상태 타입 (칼라 에폭시용)
+export type FloorConditionId = "normal" | "poor_or_premium";
+
+// 바닥 상태 옵션
+export const FLOOR_CONDITIONS: Record<FloorConditionId, {
+  name: string;
+  description: string;
+  method: string;
+}> = {
+  normal: {
+    name: "일반",
+    description: "바닥 상태가 양호함",
+    method: "얇은 코팅 (롤러 시공)"
+  },
+  poor_or_premium: {
+    name: "상태 불량 / 고급 마감",
+    description: "파손이 심하거나 거울 같은 평활도 원함",
+    method: "에폭시 라이닝 (두막형)"
+  }
+};
+
+// 마감재별 옵션 동작 설정
+export type SelfLevelingMode = "default_checked" | "optional" | "hidden";
+
+export const MATERIAL_OPTIONS_CONFIG: Record<MaterialId, {
+  selfLeveling: SelfLevelingMode;
+  showFloorCondition: boolean;
+  selfLevelingNote?: string;
+}> = {
+  transparent_epoxy: {
+    selfLeveling: "default_checked",
+    showFloorCondition: false,
+    selfLevelingNote: "투명 에폭시는 셀프레벨링 없이 시공 시 마감이 고르지 않을 수 있습니다"
+  },
+  solid_epoxy: {
+    selfLeveling: "hidden",
+    showFloorCondition: true
+  },
+  bean_gravel: {
+    selfLeveling: "optional",
+    showFloorCondition: false
+  },
+  urethane_waterproof: {
+    selfLeveling: "optional",
+    showFloorCondition: false
+  }
+};
+
 // 유틸리티 함수: 마감재 ID로 마감재 찾기
 export function getMaterialById(id: MaterialId): FloorMaterial | undefined {
   return FLOOR_MATERIALS.find(m => m.id === id);
