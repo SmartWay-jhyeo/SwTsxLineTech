@@ -402,14 +402,14 @@ export function EpoxyQuoteForm() {
               {/* 이미지 스크롤 영역 */}
               <div
                 ref={galleryRef}
-                className="flex gap-3 overflow-x-auto scrollbar-hide px-10 py-2"
+                className="flex gap-3 overflow-hidden px-10 py-2"
                 style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
               >
                 {currentGallery.map((image, index) => (
                   <div
                     key={index}
                     className={cn(
-                      "relative shrink-0 w-48 aspect-[4/3] rounded-lg overflow-hidden border-2 transition-all",
+                      "relative shrink-0 w-[calc((100%-5rem-1.5rem)/3)] aspect-[4/3] rounded-lg overflow-hidden border-2 transition-all",
                       // 색상 또는 광택이 일치하면 하이라이트
                       (image.color && image.color === selectedColor) ||
                       (image.finish && image.finish === selectedFinish)
