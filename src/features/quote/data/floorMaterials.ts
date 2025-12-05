@@ -58,8 +58,8 @@ export type GalleryImage = {
   finish?: FinishId;
 };
 
-// 이미지 캐시 버스팅 버전
-const IMG_VERSION = "?v=2";
+// 이미지 캐시 버스팅 버전 (Next.js Image에서 쿼리스트링 문제로 제거)
+const IMG_VERSION = "";
 
 // 마감재 데이터
 export const FLOOR_MATERIALS: FloorMaterial[] = [
