@@ -12,6 +12,7 @@ type Quote = {
   total_cost: number;
   contact_name: string;
   contact_phone: string;
+  notes: string | null;
   status: QuoteStatus;
   options: Record<string, unknown>;
 };
@@ -90,6 +91,9 @@ export function QuotesTable({ quotes }: { quotes: Quote[] }) {
               연락처
             </th>
             <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+              요청사항
+            </th>
+            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
               상태
             </th>
           </tr>
@@ -114,6 +118,13 @@ export function QuotesTable({ quotes }: { quotes: Quote[] }) {
               <td className="px-4 py-3 text-sm text-gray-900">
                 <div>{quote.contact_name || "-"}</div>
                 <div className="text-gray-500">{quote.contact_phone}</div>
+              </td>
+              <td className="px-4 py-3 text-sm text-gray-600 max-w-xs">
+                {quote.notes ? (
+                  <span className="line-clamp-2" title={quote.notes}>{quote.notes}</span>
+                ) : (
+                  <span className="text-gray-400">-</span>
+                )}
               </td>
               <td className="px-4 py-3 text-sm">
                 <select
