@@ -223,36 +223,7 @@ export function ParkingAreaMap({ onAreaChange, onAddressChange, onReset }: Parki
 
   return (
     <div className="space-y-3">
-      <div className="flex items-center gap-2">
-        <h3 className="text-white text-sm font-medium">시공 위치 및 면적</h3>
-        {/* 도움말 아이콘 */}
-        <div
-          className="relative"
-          onMouseEnter={() => setShowHelp(true)}
-          onMouseLeave={() => setShowHelp(false)}
-        >
-          <div className="w-6 h-6 bg-white/20 hover:bg-white/30 rounded-full flex items-center justify-center cursor-help transition-colors">
-            <HelpCircle size={16} className="text-white/70" />
-          </div>
-
-          {/* 도움말 툴팁 */}
-          {showHelp && (
-            <div className="absolute top-8 left-0 bg-white rounded-lg shadow-xl p-3 z-20 min-w-[320px]">
-              <Image
-                src="/images/manual-region2.gif"
-                alt="사용 방법 안내"
-                width={400}
-                height={300}
-                className="rounded w-full h-auto"
-                unoptimized
-              />
-              <p className="text-sm text-gray-600 mt-2 text-center whitespace-nowrap">
-                영역의 모서리를 클릭하여 측정하세요
-              </p>
-            </div>
-          )}
-        </div>
-      </div>
+      <h3 className="text-white text-sm font-medium">시공 위치 및 면적</h3>
 
       {/* 주소 검색 */}
       <div className="flex gap-2" data-tour="address-search">
@@ -277,27 +248,58 @@ export function ParkingAreaMap({ onAreaChange, onAddressChange, onReset }: Parki
       </div>
 
       {/* 지도 */}
-      <div className="relative" data-tour="map-area">
+      <div className="flex gap-3" data-tour="map-area">
+        {/* 도움말 아이콘 - 지도 왼쪽 */}
         <div
-          ref={mapContainerRef}
-          className="w-full h-[500px] rounded-lg overflow-hidden bg-gray-800"
-        />
-
-        {!isMapLoaded && (
-          <div className="absolute inset-0 flex items-center justify-center bg-gray-800 rounded-lg">
-            <span className="text-white/50 text-sm">지도 로딩 중...</span>
+          className="relative flex-shrink-0"
+          onMouseEnter={() => setShowHelp(true)}
+          onMouseLeave={() => setShowHelp(false)}
+        >
+          <div className="w-8 h-8 bg-white/20 hover:bg-white/30 rounded-full flex items-center justify-center cursor-help transition-colors">
+            <HelpCircle size={18} className="text-white/70" />
           </div>
-        )}
 
-        {/* 안내 오버레이 */}
-        {isMapLoaded && pointCount === 0 && (
-          <div className="absolute inset-0 flex items-center justify-center bg-black/40 rounded-lg pointer-events-none">
-            <div className="text-center">
-              <MapPin className="mx-auto mb-2 text-primary" size={32} />
-              <p className="text-white text-sm">지도를 클릭하여 영역을 그려주세요</p>
+          {/* 도움말 툴팁 */}
+          {showHelp && (
+            <div className="absolute top-10 left-0 bg-white rounded-lg shadow-xl p-3 z-20 min-w-[320px]">
+              <Image
+                src="/images/manual-region2.gif"
+                alt="사용 방법 안내"
+                width={400}
+                height={300}
+                className="rounded w-full h-auto"
+                unoptimized
+              />
+              <p className="text-sm text-gray-600 mt-2 text-center whitespace-nowrap">
+                영역의 모서리를 클릭하여 측정하세요
+              </p>
             </div>
-          </div>
-        )}
+          )}
+        </div>
+
+        {/* 지도 컨테이너 */}
+        <div className="relative flex-1">
+          <div
+            ref={mapContainerRef}
+            className="w-full h-[500px] rounded-lg overflow-hidden bg-gray-800"
+          />
+
+          {!isMapLoaded && (
+            <div className="absolute inset-0 flex items-center justify-center bg-gray-800 rounded-lg">
+              <span className="text-white/50 text-sm">지도 로딩 중...</span>
+            </div>
+          )}
+
+          {/* 안내 오버레이 */}
+          {isMapLoaded && pointCount === 0 && (
+            <div className="absolute inset-0 flex items-center justify-center bg-black/40 rounded-lg pointer-events-none">
+              <div className="text-center">
+                <MapPin className="mx-auto mb-2 text-primary" size={32} />
+                <p className="text-white text-sm">지도를 클릭하여 영역을 그려주세요</p>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* 컨트롤 버튼 */}
