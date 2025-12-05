@@ -167,6 +167,20 @@ export function EpoxyQuoteForm() {
     const color = selectedColor ? COLORS[selectedColor] : null;
     const condition = floorCondition ? FLOOR_CONDITIONS[floorCondition] : null;
 
+    // 선택한 옵션들을 요약 텍스트로 생성
+    const optionsSummary = [
+      `[마감재] ${material?.name || "-"}`,
+      finish ? `[광택] ${finish.name}` : null,
+      color ? `[색상] ${color.name}${needsColorMixingFee ? " (조색비 추가)" : ""}` : null,
+      condition ? `[바닥상태] ${condition.name} → ${condition.method}` : null,
+      includeSelfLeveling ? `[셀프레벨링] 포함` : null,
+      contactData.location ? `[시공장소] ${contactData.location}` : null,
+    ].filter(Boolean).join("\n");
+
+    const fullNotes = contactData.notes
+      ? `${optionsSummary}\n\n[추가요청]\n${contactData.notes}`
+      : optionsSummary;
+
     // 서버 액션에 맞는 데이터 형식으로 변환
     const quoteData: EpoxyQuoteInput = {
       service_type: "epoxy",
@@ -174,7 +188,7 @@ export function EpoxyQuoteForm() {
       surface_condition: condition?.name || "normal",
       contact_name: contactData.name,
       contact_phone: contactData.phone,
-      notes: contactData.notes || undefined,
+      notes: fullNotes,
       options: {
         material: material?.name || "",
         finish: finish?.name,

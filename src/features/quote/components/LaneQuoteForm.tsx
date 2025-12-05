@@ -94,13 +94,25 @@ export function LaneQuoteForm({ className }: LaneQuoteFormProps) {
         }
       : manualParkingData;
 
+    // 선택한 옵션들을 요약 텍스트로 생성
+    const optionsSummary = [
+      `[작업유형] ${workType === "new" ? "신규 도색" : "기존 덧칠"}`,
+      `[주차장위치] ${locationType === "ground" ? "지상" : "지하"}`,
+      address ? `[주소] ${address}` : null,
+      `[주차구획] 일반 ${parkingData.regularSpots}대, 장애인 ${parkingData.disabledSpots}대, 전기차 ${parkingData.evChargingSpots}대`,
+    ].filter(Boolean).join("\n");
+
+    const fullNotes = notes
+      ? `${optionsSummary}\n\n[추가요청]\n${notes}`
+      : optionsSummary;
+
     // 서버 액션에 맞는 데이터 형식으로 변환
     const quoteData: LaneQuoteInput = {
       service_type: "lane",
       area,
       contact_name: contactName,
       contact_phone: contactPhone,
-      notes: notes || undefined,
+      notes: fullNotes,
       options: {
         workType,
         locationType,
