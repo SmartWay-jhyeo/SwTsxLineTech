@@ -6,9 +6,10 @@ import { Search, RotateCcw, MapPin } from "lucide-react";
 type ParkingAreaMapProps = {
   onAreaChange: (area: number) => void;
   onAddressChange: (address: string) => void;
+  onReset?: () => void;  // 부모 컴포넌트 초기화 콜백
 };
 
-export function ParkingAreaMap({ onAreaChange, onAddressChange }: ParkingAreaMapProps) {
+export function ParkingAreaMap({ onAreaChange, onAddressChange, onReset }: ParkingAreaMapProps) {
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<kakao.maps.Map | null>(null);
   const polygonRef = useRef<kakao.maps.Polygon | null>(null);
@@ -48,6 +49,24 @@ export function ParkingAreaMap({ onAreaChange, onAddressChange }: ParkingAreaMap
     return Math.abs(area / 2);
   };
 
+  // 중심점 기준 각도로 점 정렬 (클릭 순서 무관하게 폴리곤 형성)
+  const sortPointsByAngle = (points: kakao.maps.LatLng[]): kakao.maps.LatLng[] => {
+    if (points.length < 3) return points;
+
+    // 중심점(centroid) 계산
+    const centroid = {
+      lat: points.reduce((sum, p) => sum + p.getLat(), 0) / points.length,
+      lng: points.reduce((sum, p) => sum + p.getLng(), 0) / points.length,
+    };
+
+    // 중심점 기준 시계방향 정렬
+    return [...points].sort((a, b) => {
+      const angleA = Math.atan2(a.getLat() - centroid.lat, a.getLng() - centroid.lng);
+      const angleB = Math.atan2(b.getLat() - centroid.lat, b.getLng() - centroid.lng);
+      return angleA - angleB;
+    });
+  };
+
   // 폴리곤 업데이트 및 면적 계산
   const updatePolygon = () => {
     if (!mapRef.current) return;
@@ -65,9 +84,12 @@ export function ParkingAreaMap({ onAreaChange, onAddressChange }: ParkingAreaMap
       return;
     }
 
-    // 새 폴리곤 생성
+    // 클릭 순서와 무관하게 올바른 폴리곤을 형성하도록 정렬
+    const sortedPoints = sortPointsByAngle(points);
+
+    // 새 폴리곤 생성 (정렬된 점 사용)
     const polygon = new window.kakao.maps.Polygon({
-      path: points,
+      path: sortedPoints,
       strokeWeight: 3,
       strokeColor: "#f58220",
       strokeOpacity: 0.9,
@@ -77,7 +99,8 @@ export function ParkingAreaMap({ onAreaChange, onAddressChange }: ParkingAreaMap
     });
     polygonRef.current = polygon;
 
-    const area = calculatePolygonArea(points);
+    // 정렬된 점으로 면적 계산
+    const area = calculatePolygonArea(sortedPoints);
     setCalculatedArea(area);
     onAreaChange(area);
   };
@@ -191,6 +214,9 @@ export function ParkingAreaMap({ onAreaChange, onAddressChange }: ParkingAreaMap
     // 그리기 모드 유지
     isDrawingRef.current = true;
     setIsDrawing(true);
+
+    // 부모 컴포넌트 상태도 초기화
+    onReset?.();
   };
 
   return (

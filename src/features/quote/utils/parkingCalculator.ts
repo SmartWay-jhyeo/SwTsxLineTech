@@ -2,7 +2,8 @@
  * 주차장 면적 기반 자동 계산 유틸리티
  *
  * 법적 기준 (2025년):
- * - 1대당 면적: 약 30㎡ (주차면 12.5㎡ + 통로)
+ * - 지상 주차장: 1대당 약 25㎡ (주차면 12.5㎡ + 통로)
+ * - 지하 주차장: 1대당 약 33㎡ (기둥, 램프 등 추가 공간)
  * - 장애인 주차: 2~4% (10대 이상, 3% 적용)
  * - 전기차 충전: 5% 신축 / 2% 기축
  */
@@ -14,8 +15,14 @@ export type ParkingCalculationResult = {
   evSpots: number;
 };
 
+// 주차장 위치 유형
+export type LocationType = 'ground' | 'underground';
+
 // 1대당 소요 면적 (주차면 + 통로 + 기타)
-const AREA_PER_SPOT = 30;
+const AREA_PER_SPOT = {
+  ground: 25,       // 지상: 25m²/대
+  underground: 33,  // 지하: 33m²/대 (기둥, 램프 등)
+} as const;
 
 // 장애인 주차 비율 (3%)
 const DISABLED_RATIO = 0.03;
@@ -26,11 +33,18 @@ const EV_RATIO = 0.05;
 /**
  * 면적 기반 주차 구획 자동 계산
  * @param areaSqm 총 면적 (m²)
+ * @param locationType 주차장 위치 (지상/지하)
  * @returns 주차 구획 계산 결과
  */
-export function calculateParkingSpots(areaSqm: number): ParkingCalculationResult {
+export function calculateParkingSpots(
+  areaSqm: number,
+  locationType: LocationType = 'ground'
+): ParkingCalculationResult {
+  // 위치에 따른 면적 계수 적용
+  const areaPerSpot = AREA_PER_SPOT[locationType];
+
   // 총 주차대수 계산
-  const totalSpots = Math.floor(areaSqm / AREA_PER_SPOT);
+  const totalSpots = Math.floor(areaSqm / areaPerSpot);
 
   if (totalSpots <= 0) {
     return {

@@ -1,12 +1,12 @@
 "use client";
 
 import { useState, useMemo, useEffect } from "react";
-import { ArrowRight, Sparkles, PaintBucket } from "lucide-react";
+import { ArrowRight, Sparkles, PaintBucket, Building2, Trees } from "lucide-react";
 import { ParkingAreaMap } from "./ParkingAreaMap";
 import { ParkingOptions } from "./ParkingOptions";
 import { EstimatedPrice } from "./EstimatedPrice";
 import { TourGuide } from "./TourGuide";
-import { calculateParkingSpots, calculateEstimatedPrice, formatArea } from "../utils/parkingCalculator";
+import { calculateParkingSpots, calculateEstimatedPrice, formatArea, LocationType } from "../utils/parkingCalculator";
 
 type WorkType = "new" | "repaint";
 
@@ -17,6 +17,9 @@ type LaneQuoteFormProps = {
 export function LaneQuoteForm({ className }: LaneQuoteFormProps) {
   // 작업 유형 (신규/덧칠)
   const [workType, setWorkType] = useState<WorkType>("new");
+
+  // 주차장 위치 (지상/지하)
+  const [locationType, setLocationType] = useState<LocationType>("ground");
 
   // 주소 및 면적
   const [address, setAddress] = useState("");
@@ -34,13 +37,13 @@ export function LaneQuoteForm({ className }: LaneQuoteFormProps) {
   const [contactPhone, setContactPhone] = useState("");
   const [notes, setNotes] = useState("");
 
-  // 자동 계산 결과
+  // 자동 계산 결과 (지상/지하에 따라 면적 계수 적용)
   const autoCalculation = useMemo(() => {
     if (area > 0) {
-      return calculateParkingSpots(area);
+      return calculateParkingSpots(area, locationType);
     }
     return null;
-  }, [area]);
+  }, [area, locationType]);
 
   // 자동 계산 결과가 변경되면 수정 가능한 데이터에 동기화 (신규 도색일 때만)
   useEffect(() => {
@@ -61,6 +64,14 @@ export function LaneQuoteForm({ className }: LaneQuoteFormProps) {
     return null;
   }, [workType, manualParkingData]);
 
+  // 전체 초기화 (지도 초기화 버튼과 연동)
+  const handleFullReset = () => {
+    setArea(0);
+    setAddress("");
+    setManualParkingData({ disabledSpots: 0, evChargingSpots: 0, regularSpots: 0 });
+    // workType과 locationType은 유지
+  };
+
   const handleSubmit = () => {
     if (!address) {
       alert("주소를 입력해주세요.");
@@ -74,6 +85,7 @@ export function LaneQuoteForm({ className }: LaneQuoteFormProps) {
     const quoteData = {
       serviceType: "lane",
       workType,
+      locationType,
       address,
       area,
       parkingData: workType === "new" ? autoCalculation : manualParkingData,
@@ -91,32 +103,63 @@ export function LaneQuoteForm({ className }: LaneQuoteFormProps) {
       {/* 투어 가이드 (첫 방문 시) */}
       <TourGuide />
 
-      {/* 작업 유형 탭 */}
-      <div className="flex mb-6 bg-white/5 rounded-lg p-1">
-        <button
-          type="button"
-          onClick={() => setWorkType("new")}
-          className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-md text-sm font-medium transition-all ${
-            workType === "new"
-              ? "bg-primary text-white"
-              : "text-white/60 hover:text-white"
-          }`}
-        >
-          <Sparkles size={18} />
-          신규 도색
-        </button>
-        <button
-          type="button"
-          onClick={() => setWorkType("repaint")}
-          className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-md text-sm font-medium transition-all ${
-            workType === "repaint"
-              ? "bg-primary text-white"
-              : "text-white/60 hover:text-white"
-          }`}
-        >
-          <PaintBucket size={18} />
-          기존 덧칠
-        </button>
+      {/* 옵션 선택 영역 */}
+      <div className="flex flex-col sm:flex-row gap-3 mb-6">
+        {/* 작업 유형 탭 */}
+        <div className="flex flex-1 bg-white/5 rounded-lg p-1">
+          <button
+            type="button"
+            onClick={() => setWorkType("new")}
+            className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-md text-sm font-medium transition-all ${
+              workType === "new"
+                ? "bg-primary text-white"
+                : "text-white/60 hover:text-white"
+            }`}
+          >
+            <Sparkles size={18} />
+            신규 도색
+          </button>
+          <button
+            type="button"
+            onClick={() => setWorkType("repaint")}
+            className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-md text-sm font-medium transition-all ${
+              workType === "repaint"
+                ? "bg-primary text-white"
+                : "text-white/60 hover:text-white"
+            }`}
+          >
+            <PaintBucket size={18} />
+            기존 덧칠
+          </button>
+        </div>
+
+        {/* 주차장 위치 탭 */}
+        <div className="flex flex-1 bg-white/5 rounded-lg p-1">
+          <button
+            type="button"
+            onClick={() => setLocationType("ground")}
+            className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-md text-sm font-medium transition-all ${
+              locationType === "ground"
+                ? "bg-primary text-white"
+                : "text-white/60 hover:text-white"
+            }`}
+          >
+            <Trees size={18} />
+            지상
+          </button>
+          <button
+            type="button"
+            onClick={() => setLocationType("underground")}
+            className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-md text-sm font-medium transition-all ${
+              locationType === "underground"
+                ? "bg-primary text-white"
+                : "text-white/60 hover:text-white"
+            }`}
+          >
+            <Building2 size={18} />
+            지하
+          </button>
+        </div>
       </div>
 
       {/* 2단 레이아웃 */}
@@ -126,6 +169,7 @@ export function LaneQuoteForm({ className }: LaneQuoteFormProps) {
           <ParkingAreaMap
             onAreaChange={setArea}
             onAddressChange={setAddress}
+            onReset={handleFullReset}
           />
         </div>
 
