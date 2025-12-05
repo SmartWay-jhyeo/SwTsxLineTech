@@ -28,7 +28,7 @@ const tourSteps: TourStep[] = [
     title: "지도에서 영역 그리기",
     description: "주차장 영역의 꼭지점을 클릭하여 면적을 측정해주세요. 클릭할 때마다 점이 추가됩니다.",
     icon: <MapPin size={28} />,
-    image: "/images/manual-region.gif",
+    image: "/images/manual-region2.gif",
   },
   {
     id: 3,
