@@ -273,16 +273,16 @@ export function ParkingAreaMap({ onAreaChange, onAddressChange, onReset }: Parki
 
             {/* 도움말 툴팁 */}
             {showHelp && (
-              <div className="absolute top-10 left-0 bg-white rounded-lg shadow-xl p-2 z-20">
+              <div className="absolute top-10 left-0 bg-white rounded-lg shadow-xl p-3 z-20 min-w-[320px]">
                 <Image
                   src="/images/manual-region2.gif"
                   alt="사용 방법 안내"
-                  width={300}
-                  height={200}
-                  className="rounded"
+                  width={400}
+                  height={300}
+                  className="rounded w-full h-auto"
                   unoptimized
                 />
-                <p className="text-xs text-gray-600 mt-2 text-center">
+                <p className="text-sm text-gray-600 mt-2 text-center whitespace-nowrap">
                   영역의 모서리를 클릭하여 측정하세요
                 </p>
               </div>
