@@ -120,13 +120,39 @@ export function QuotesTable({ quotes }: { quotes: Quote[] }) {
                 <div className="text-gray-500">{quote.contact_phone}</div>
               </td>
               <td className="px-4 py-3 text-sm text-gray-600 max-w-md">
-                {quote.notes ? (
-                  <pre className="whitespace-pre-wrap font-sans text-xs bg-gray-50 p-2 rounded max-h-32 overflow-y-auto">
-                    {quote.notes}
-                  </pre>
-                ) : (
-                  <span className="text-gray-400">-</span>
-                )}
+                <div className="space-y-2">
+                  {/* options 표시 */}
+                  {quote.options && Object.keys(quote.options).length > 0 && (
+                    <div className="text-xs bg-blue-50 p-2 rounded">
+                      {quote.service_type === "lane" ? (
+                        <>
+                          <div><span className="text-gray-500">작업:</span> {(quote.options as { workType?: string }).workType === "new" ? "신규 도색" : "기존 덧칠"}</div>
+                          <div><span className="text-gray-500">위치:</span> {(quote.options as { locationType?: string }).locationType === "ground" ? "지상" : "지하"}</div>
+                          <div><span className="text-gray-500">주소:</span> {(quote.options as { address?: string }).address || "-"}</div>
+                          {(quote.options as { parkingData?: { regularSpots: number; disabledSpots: number; evChargingSpots: number } }).parkingData && (
+                            <div><span className="text-gray-500">주차:</span> 일반 {(quote.options as { parkingData: { regularSpots: number } }).parkingData.regularSpots}대, 장애인 {(quote.options as { parkingData: { disabledSpots: number } }).parkingData.disabledSpots}대, 전기차 {(quote.options as { parkingData: { evChargingSpots: number } }).parkingData.evChargingSpots}대</div>
+                          )}
+                        </>
+                      ) : (
+                        <>
+                          <div><span className="text-gray-500">마감재:</span> {(quote.options as { material?: string }).material || "-"}</div>
+                          {(quote.options as { finish?: string }).finish && <div><span className="text-gray-500">광택:</span> {(quote.options as { finish?: string }).finish}</div>}
+                          {(quote.options as { color?: string }).color && <div><span className="text-gray-500">색상:</span> {(quote.options as { color?: string }).color}</div>}
+                          {(quote.options as { floorCondition?: string }).floorCondition && <div><span className="text-gray-500">바닥:</span> {(quote.options as { floorCondition?: string }).floorCondition}</div>}
+                          {(quote.options as { selfLeveling?: boolean }).selfLeveling && <div><span className="text-gray-500">셀프레벨링:</span> 포함</div>}
+                          {(quote.options as { location?: string }).location && <div><span className="text-gray-500">장소:</span> {(quote.options as { location?: string }).location}</div>}
+                        </>
+                      )}
+                    </div>
+                  )}
+                  {/* notes 표시 */}
+                  {quote.notes && (
+                    <div className="text-xs bg-gray-50 p-2 rounded">
+                      <span className="text-gray-500">메모:</span> {quote.notes}
+                    </div>
+                  )}
+                  {!quote.options && !quote.notes && <span className="text-gray-400">-</span>}
+                </div>
               </td>
               <td className="px-4 py-3 text-sm">
                 <select
