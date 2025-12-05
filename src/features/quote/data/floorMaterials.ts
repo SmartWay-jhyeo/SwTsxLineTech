@@ -207,11 +207,11 @@ export const MATERIAL_OPTIONS_CONFIG: Record<MaterialId, {
     showFloorCondition: true
   },
   bean_gravel: {
-    selfLeveling: "optional",
+    selfLeveling: "hidden",
     showFloorCondition: false
   },
   urethane_waterproof: {
-    selfLeveling: "optional",
+    selfLeveling: "hidden",
     showFloorCondition: false
   }
 };
