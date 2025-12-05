@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useMemo, useEffect } from "react";
-import { ArrowRight, Sparkles, PaintBucket, Building2, Trees } from "lucide-react";
+import { ArrowRight, Sparkles, PaintBucket, Building2, Trees, Loader2 } from "lucide-react";
+import { submitQuote, type LaneQuoteInput } from "../actions";
 import { ParkingAreaMap } from "./ParkingAreaMap";
 import { ParkingOptions } from "./ParkingOptions";
 import { EstimatedPrice } from "./EstimatedPrice";
@@ -36,6 +37,9 @@ export function LaneQuoteForm({ className }: LaneQuoteFormProps) {
   const [contactName, setContactName] = useState("");
   const [contactPhone, setContactPhone] = useState("");
   const [notes, setNotes] = useState("");
+
+  // 제출 상태
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // 자동 계산 결과 (지상/지하에 따라 면적 계수 적용)
   const autoCalculation = useMemo(() => {
@@ -72,7 +76,7 @@ export function LaneQuoteForm({ className }: LaneQuoteFormProps) {
     // workType과 locationType은 유지
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!address) {
       alert("주소를 입력해주세요.");
       return;
@@ -82,20 +86,52 @@ export function LaneQuoteForm({ className }: LaneQuoteFormProps) {
       return;
     }
 
-    const quoteData = {
-      serviceType: "lane",
-      workType,
-      locationType,
-      address,
+    const parkingData = workType === "new" && autoCalculation
+      ? {
+          regularSpots: autoCalculation.regularSpots,
+          disabledSpots: autoCalculation.disabledSpots,
+          evChargingSpots: autoCalculation.evSpots,
+        }
+      : manualParkingData;
+
+    // 서버 액션에 맞는 데이터 형식으로 변환
+    const quoteData: LaneQuoteInput = {
+      service_type: "lane",
       area,
-      parkingData: workType === "new" ? autoCalculation : manualParkingData,
-      contactName,
-      contactPhone,
-      notes,
+      contact_name: contactName,
+      contact_phone: contactPhone,
+      notes: notes || undefined,
+      options: {
+        workType,
+        locationType,
+        address,
+        parkingData,
+      },
+      base_cost: estimatedPrice?.subtotal || 0,
+      option_cost: 0,
+      total_cost: estimatedPrice?.total || 0,
+      is_minimum_applied: estimatedPrice?.isMinimumApplied || false,
     };
 
-    console.log("견적 요청 데이터:", quoteData);
-    alert("견적 요청이 접수되었습니다!\n담당자가 빠른 시일 내에 연락드리겠습니다.");
+    setIsSubmitting(true);
+    try {
+      const result = await submitQuote(quoteData);
+
+      if (result.success) {
+        alert("견적 요청이 접수되었습니다!\n담당자가 빠른 시일 내에 연락드리겠습니다.");
+        // 폼 초기화
+        handleFullReset();
+        setContactName("");
+        setContactPhone("");
+        setNotes("");
+      } else {
+        alert("견적 요청 중 오류가 발생했습니다.\n" + (result.error || "다시 시도해주세요."));
+      }
+    } catch {
+      alert("견적 요청 중 오류가 발생했습니다.\n다시 시도해주세요.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -257,10 +293,20 @@ export function LaneQuoteForm({ className }: LaneQuoteFormProps) {
         <button
           type="button"
           onClick={handleSubmit}
-          className="w-full flex items-center justify-center gap-2 h-14 bg-primary rounded-full text-white font-medium hover:opacity-90 transition-opacity"
+          disabled={isSubmitting}
+          className="w-full flex items-center justify-center gap-2 h-14 bg-primary rounded-full text-white font-medium hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          <span>견적 요청하기</span>
-          <ArrowRight size={20} />
+          {isSubmitting ? (
+            <>
+              <Loader2 size={20} className="animate-spin" />
+              <span>요청 중...</span>
+            </>
+          ) : (
+            <>
+              <span>견적 요청하기</span>
+              <ArrowRight size={20} />
+            </>
+          )}
         </button>
       </div>
     </div>

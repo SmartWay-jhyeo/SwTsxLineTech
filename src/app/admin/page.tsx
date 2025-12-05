@@ -2,7 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { createClient } from "@/lib/supabase/server";
 import { Button } from "@/components/ui/button";
-import { Plus, Trash2 } from "lucide-react";
+import { Plus, Trash2, FileText } from "lucide-react";
 import { deletePortfolioItem } from "@/features/admin/actions";
 
 // 포트폴리오 아이템 타입 정의
@@ -24,13 +24,21 @@ export default async function AdminDashboard() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold text-gray-900">시공 사례 관리</h2>
-        <Button asChild>
-          <Link href="/admin/portfolio/new" className="gap-2">
-            <Plus size={16} />
-            새 사례 등록
-          </Link>
-        </Button>
+        <h2 className="text-2xl font-bold text-gray-900">대시보드</h2>
+        <div className="flex gap-2">
+          <Button asChild variant="outline">
+            <Link href="/admin/quotes" className="gap-2">
+              <FileText size={16} />
+              견적 관리
+            </Link>
+          </Button>
+          <Button asChild>
+            <Link href="/admin/portfolio/new" className="gap-2">
+              <Plus size={16} />
+              새 사례 등록
+            </Link>
+          </Button>
+        </div>
       </div>
 
       <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">

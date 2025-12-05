@@ -2,7 +2,8 @@
 
 import { useState, useMemo, useRef } from "react";
 import Image from "next/image";
-import { ArrowRight, Check, ChevronLeft, ChevronRight, AlertCircle, ChevronUp, Calculator } from "lucide-react";
+import { ArrowRight, Check, ChevronLeft, ChevronRight, AlertCircle, ChevronUp, Calculator, Loader2 } from "lucide-react";
+import { submitQuote, type EpoxyQuoteInput } from "../actions";
 import { cn } from "@/lib/utils";
 import {
   FLOOR_MATERIALS,
@@ -48,6 +49,9 @@ export function EpoxyQuoteForm() {
 
   // 모바일 견적 패널 펼침 상태
   const [isMobilePanelOpen, setIsMobilePanelOpen] = useState(false);
+
+  // 제출 상태
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // 이미지 갤러리 스크롤 ref
   const galleryRef = useRef<HTMLDivElement>(null);
@@ -131,7 +135,7 @@ export function EpoxyQuoteForm() {
   };
 
   // 제출 핸들러
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!selectedMaterial) {
       alert("마감재를 선택해주세요.");
       return;
@@ -163,22 +167,53 @@ export function EpoxyQuoteForm() {
     const color = selectedColor ? COLORS[selectedColor] : null;
     const condition = floorCondition ? FLOOR_CONDITIONS[floorCondition] : null;
 
-    const quoteData = {
-      serviceType: "epoxy",
-      material: material?.name,
-      finish: finish?.name,
-      color: color?.name,
-      colorMixingFee: needsColorMixingFee,
-      selfLeveling: includeSelfLeveling,
-      floorCondition: condition?.name,
-      applicationMethod: condition?.method,
+    // 서버 액션에 맞는 데이터 형식으로 변환
+    const quoteData: EpoxyQuoteInput = {
+      service_type: "epoxy",
       area: parseFloat(area),
-      estimatedPrice: priceBreakdown?.total,
-      ...contactData,
+      surface_condition: condition?.name || "normal",
+      contact_name: contactData.name,
+      contact_phone: contactData.phone,
+      notes: contactData.notes || undefined,
+      options: {
+        material: material?.name || "",
+        finish: finish?.name,
+        color: color?.name,
+        colorMixingFee: needsColorMixingFee,
+        selfLeveling: includeSelfLeveling,
+        floorCondition: condition?.name,
+        applicationMethod: condition?.method,
+        location: contactData.location,
+      },
+      base_cost: priceBreakdown?.basePrice || 0,
+      option_cost: (priceBreakdown?.selfLevelingPrice || 0) + (priceBreakdown?.colorMixingFee || 0),
+      surcharge: 0,
+      total_cost: priceBreakdown?.total || 0,
+      is_minimum_applied: priceBreakdown?.isMinFeeApplied || false,
     };
 
-    console.log("견적 요청 데이터:", quoteData);
-    alert("견적 요청이 접수되었습니다!\n담당자가 빠른 시일 내에 연락드리겠습니다.");
+    setIsSubmitting(true);
+    try {
+      const result = await submitQuote(quoteData);
+
+      if (result.success) {
+        alert("견적 요청이 접수되었습니다!\n담당자가 빠른 시일 내에 연락드리겠습니다.");
+        // 폼 초기화
+        setSelectedMaterial(null);
+        setSelectedFinish(null);
+        setSelectedColor(null);
+        setIncludeSelfLeveling(false);
+        setFloorCondition(null);
+        setArea("");
+        setContactData({ location: "", name: "", phone: "", notes: "" });
+      } else {
+        alert("견적 요청 중 오류가 발생했습니다.\n" + (result.error || "다시 시도해주세요."));
+      }
+    } catch {
+      alert("견적 요청 중 오류가 발생했습니다.\n다시 시도해주세요.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   // 견적 패널 컴포넌트
@@ -303,10 +338,20 @@ export function EpoxyQuoteForm() {
           <button
             type="button"
             onClick={handleSubmit}
-            className="w-full mt-6 flex items-center justify-center gap-2 h-12 bg-primary rounded-lg text-white font-medium hover:opacity-90 transition-opacity"
+            disabled={isSubmitting}
+            className="w-full mt-6 flex items-center justify-center gap-2 h-12 bg-primary rounded-lg text-white font-medium hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            <span>견적 요청하기</span>
-            <ArrowRight size={18} />
+            {isSubmitting ? (
+              <>
+                <Loader2 size={18} className="animate-spin" />
+                <span>요청 중...</span>
+              </>
+            ) : (
+              <>
+                <span>견적 요청하기</span>
+                <ArrowRight size={18} />
+              </>
+            )}
           </button>
         )}
       </div>
@@ -662,10 +707,20 @@ export function EpoxyQuoteForm() {
         <button
           type="button"
           onClick={handleSubmit}
-          className="lg:hidden w-full flex items-center justify-center gap-2 h-14 bg-primary rounded-full text-white font-medium hover:opacity-90 transition-opacity"
+          disabled={isSubmitting}
+          className="lg:hidden w-full flex items-center justify-center gap-2 h-14 bg-primary rounded-full text-white font-medium hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          <span>견적 요청하기</span>
-          <ArrowRight size={20} />
+          {isSubmitting ? (
+            <>
+              <Loader2 size={20} className="animate-spin" />
+              <span>요청 중...</span>
+            </>
+          ) : (
+            <>
+              <span>견적 요청하기</span>
+              <ArrowRight size={20} />
+            </>
+          )}
         </button>
       </div>
 

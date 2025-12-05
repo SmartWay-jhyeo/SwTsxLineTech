@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, PlusCircle, LogOut, Home } from "lucide-react";
+import { LayoutDashboard, PlusCircle, LogOut, Home, FileText } from "lucide-react";
 import { logout } from "@/features/auth/actions";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -19,6 +19,11 @@ export default function AdminLayout({
       title: "대시보드",
       href: "/admin",
       icon: LayoutDashboard,
+    },
+    {
+      title: "견적 관리",
+      href: "/admin/quotes",
+      icon: FileText,
     },
     {
       title: "시공 사례 등록",
