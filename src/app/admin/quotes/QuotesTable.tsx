@@ -119,9 +119,11 @@ export function QuotesTable({ quotes }: { quotes: Quote[] }) {
                 <div>{quote.contact_name || "-"}</div>
                 <div className="text-gray-500">{quote.contact_phone}</div>
               </td>
-              <td className="px-4 py-3 text-sm text-gray-600 max-w-xs">
+              <td className="px-4 py-3 text-sm text-gray-600 max-w-md">
                 {quote.notes ? (
-                  <span className="line-clamp-2" title={quote.notes}>{quote.notes}</span>
+                  <pre className="whitespace-pre-wrap font-sans text-xs bg-gray-50 p-2 rounded max-h-32 overflow-y-auto">
+                    {quote.notes}
+                  </pre>
                 ) : (
                   <span className="text-gray-400">-</span>
                 )}
