@@ -343,7 +343,7 @@ export function EpoxyQuoteForm() {
         {/* 2. 마감재 선택 */}
         <section className="space-y-4">
           <h3 className="text-white text-sm font-medium">마감재 종류</h3>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {FLOOR_MATERIALS.map((material) => (
               <button
                 key={material.id}
@@ -409,7 +409,7 @@ export function EpoxyQuoteForm() {
                   <div
                     key={index}
                     className={cn(
-                      "relative shrink-0 w-[calc((100%-5rem-1.5rem)/3)] aspect-[4/3] rounded-lg overflow-hidden border-2 transition-all",
+                      "relative shrink-0 w-[calc((100%-5rem-0.75rem)/2)] aspect-[4/3] rounded-lg overflow-hidden border-2 transition-all",
                       // 색상 또는 광택이 일치하면 하이라이트
                       (image.color && image.color === selectedColor) ||
                       (image.finish && image.finish === selectedFinish)
