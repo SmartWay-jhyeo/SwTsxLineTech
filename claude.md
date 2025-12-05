@@ -1,92 +1,72 @@
-# Auto-Quote Paving System Context & Rules
+# 라인테크 자동 견적 시스템
 
-## 1. Project Identity
-- **Name:** Auto-Quote Paving System
-- **Goal:** Self-service web platform for pavement/lane painting estimation.
-- **Key Logic:** Dynamic pricing based on area/options with a "Minimum Mobilization Cost" floor.
+## 프로젝트 개요
+차선/에폭시/도장 시공 견적을 위한 셀프서비스 웹 플랫폼.
+Kakao Maps로 면적 측정 → 자동 가격 계산 → 문의 접수
 
-## 2. Tech Stack (Strict Version)
-- **Frontend:** Next.js 14+ (App Router), React, TypeScript, Tailwind CSS
-- **UI Lib:** Shadcn/ui (Radix UI based), Lucide React
-- **State:** Zustand (Client global), React Hook Form + Zod (Form validation)
-- **Backend:** Next.js Server Actions (No API Routes), Supabase (DB/Auth)
-- **Styling:** Tailwind CSS (Mobile First)
+## 기술 스택
+- Next.js 15+ (App Router), React 19, TypeScript
+- Supabase (PostgreSQL, Auth, Storage)
+- Tailwind CSS + Shadcn/ui
+- Kakao Maps API
 
-## 3. Directory Structure
-Follow this Feature-based architecture strictly. Do not create flat structures.
+## 서비스 유형
+
+| 서비스 | URL | 주요 기능 |
+|--------|-----|-----------|
+| 차선 | `/quote/lane` | 지도 면적 측정 → 주차칸 자동 계산 |
+| 에폭시 | `/quote/epoxy` | 재료/마감/색상 선택 |
+| 도장 | `/quote/paint` | 재료/마감/색상 선택 |
+
+## 핵심 비즈니스 로직
+
+### 공통
+**최소 출장비** - 견적 < 예를들어 300,000원이면 300,000원 반환
+
+### 차선 (Lane)
+- 면적 30m² = 주차 1대
+- 장애인석: 10대 이상 시 3%
+- 전기차석: 20대 이상 시 5%
+- 단가: 일반 30,000원, 장애인/전기차 50,000원
+
+### 에폭시/도장 (Epoxy/Paint)
+**재료 옵션**
+- 에폭시: 콘크리트 에폭시, 칼라 에폭시, 우레탄 방수, 셀프레벨링
+- 도장: 내부 도장, 외부 도장, 방수 페인트, 내화 페인트
+
+**마감**: 유광, 무광, 반광
+**색상**: 파랑, 초록, 회색, 흰색, 노랑, 빨강, 검정
+
+## 디렉토리 구조
 ```
-/src
-  /app                # Next.js App Router
-    /(public)         # Public access pages
-    /(admin)          # Admin protected pages
-  /components
-    /ui               # Primitive UI (Buttons, Inputs - from shadcn)
-    /shared           # Shared components used across features
-  /features           # ★ Domain Logic (Colocate components, hooks, stores)
-    /quote            # Feature: Estimation Wizard
-      /components     # Quote specific UI
-      /hooks          # Quote logic hooks
-      /store          # Zustand store (useQuoteStore)
-      /utils.ts       # Pricing calculation pure functions
-    /admin            # Feature: Dashboard
-  /lib                # Global utils (supabase client, cn helper)
-  /types              # Global types (Database definitions)
+src/
+├── app/           # 페이지 (/(public), /admin)
+├── features/      # 도메인 로직 (quote, portfolio, auth, admin)
+├── components/    # 공용 UI (ui/, shared/)
+├── lib/           # 유틸 (supabase, cn)
+└── types/         # 타입 정의
 ```
 
-## 4. Coding Guidelines (The "Law")
+## 명령어
+```bash
+npm run dev     # 개발 서버 (localhost:3000)
+npm run build   # 프로덕션 빌드
+npm run lint    # ESLint 검사
+```
 
-### 4.1 TypeScript & Syntax
-- **STRICT MODE:** No `any`. No `// @ts-ignore`. Explicitly type all props and return values.
-- **Functional Components:** Use `const Component = () => {}` with named exports. Avoid `default export`.
-- **Imports:** ALWAYS use absolute imports (`@/components/...`). Do not use relative paths (`../../`).
+## 주요 파일
 
-### 4.2 Next.js App Router Rules
-- **Server Components:** All components are Server Components by default.
-- **Client Components:** Add `'use client'` at the very top only when:
-  - Using `useState`, `useEffect`, `useRef`.
-  - Using event listeners (`onClick`, `onChange`).
-  - Using browser APIs (`window`, `localStorage`).
-- **Data Fetching:** Use **Server Actions** directly in Server Components. Avoid `useEffect` for data fetching unless absolutely necessary.
+| 기능 | 파일 |
+|------|------|
+| 차선 견적 | `src/features/quote/components/LaneQuoteForm.tsx` |
+| 에폭시/도장 견적 | `src/features/quote/components/QuoteForm.tsx` |
+| 재료 선택 | `src/features/quote/components/MaterialSelector.tsx` |
+| 마감 선택 | `src/features/quote/components/FinishTypeSelector.tsx` |
+| 색상 선택 | `src/features/quote/components/ColorPicker.tsx` |
+| 가격 계산 | `src/features/quote/utils/parkingCalculator.ts` |
+| 인증 | `src/features/auth/actions.ts` |
 
-### 4.3 UI & Styling Rules
-- **Tailwind:** Use utility classes. Do not create `.css` files or `styled-components`.
-- **Responsiveness:** Mobile-first approach. (e.g., `class="w-full md:w-1/2"`).
-- **Shadcn UI:** When using `className` props, ALWAYS wrap with `cn()` utility to allow overrides.
-  - *Bad:* `<Button className="bg-red-500" />`
-  - *Good:* `<Button className={cn("bg-red-500", className)} />`
-
-### 4.4 State Management Rules
-- **Form State:** Use `react-hook-form` for all input forms. Do not use local `useState` for complex forms.
-- **Global State:** Use `Zustand` for the Quote Wizard step data (to persist data between steps).
-
-## 5. Business Logic (Core Constraints)
-**CRITICAL: Pricing Algorithm**
-When implementing `calculateQuote(input)`:
-1. Calculate `baseCost` = (Quantity * UnitPrice).
-2. Calculate `optionCost` = Sum(Option * OptionPrice).
-3. Apply `surcharge` if (SurfaceCondition == Bad).
-4. **Final Check (Mobilization Cost):**
-   ```typescript
-   // This logic must never be omitted
-   if (total < MIN_MOBILIZATION_COST) {
-     return MIN_MOBILIZATION_COST; // e.g., 500,000 KRW
-   }
-   ```
-Never show a price lower than the minimum cost.
-
-## 6. Implementation Roadmap (Checklist)
-
-### Phase 1: Foundation
-- [ ] Initialize Next.js 14 + Supabase + Tailwind.
-- [ ] Setup src/features folder structure.
-- [ ] Install Shadcn UI & Icons.
-
-### Phase 2: Core Logic (Backend First)
-- [ ] Define Supabase Tables (services, materials, quotes).
-- [ ] Implement calculateQuote utility with Jest tests.
-- [ ] Create Server Actions for fetching pricing data.
-
-### Phase 3: UI Implementation
-- [ ] Build Quote Wizard UI (Step 1 -> Step 4).
-- [ ] Connect Zustand store to Wizard inputs.
-- [ ] Visualize Real-time Price updates.
+## 문서
+- 코딩 규칙: `docs/coding-conventions.md`
+- 아키텍처: `docs/architecture.md`
+- 트러블슈팅: `docs/troubleshooting.md`

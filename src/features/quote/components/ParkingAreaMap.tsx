@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Search, RotateCcw, MapPin } from "lucide-react";
+import { Search, RotateCcw, MapPin, HelpCircle } from "lucide-react";
+import Image from "next/image";
 
 type ParkingAreaMapProps = {
   onAreaChange: (area: number) => void;
@@ -22,6 +23,7 @@ export function ParkingAreaMap({ onAreaChange, onAddressChange, onReset }: Parki
   const [pointCount, setPointCount] = useState(0);
   const [calculatedArea, setCalculatedArea] = useState<number>(0);
   const [isDrawing, setIsDrawing] = useState(false);
+  const [showHelp, setShowHelp] = useState(false);
 
   // 폴리곤 면적 계산 (Shoelace formula)
   const calculatePolygonArea = (coords: kakao.maps.LatLng[]): number => {
@@ -255,6 +257,36 @@ export function ParkingAreaMap({ onAreaChange, onAddressChange, onReset }: Parki
         {!isMapLoaded && (
           <div className="absolute inset-0 flex items-center justify-center bg-gray-800 rounded-lg">
             <span className="text-white/50 text-sm">지도 로딩 중...</span>
+          </div>
+        )}
+
+        {/* 도움말 아이콘 */}
+        {isMapLoaded && (
+          <div
+            className="absolute top-3 left-3 z-10"
+            onMouseEnter={() => setShowHelp(true)}
+            onMouseLeave={() => setShowHelp(false)}
+          >
+            <div className="w-8 h-8 bg-white/80 hover:bg-white rounded-full flex items-center justify-center cursor-help transition-colors shadow-md">
+              <HelpCircle size={20} className="text-gray-500" />
+            </div>
+
+            {/* 도움말 툴팁 */}
+            {showHelp && (
+              <div className="absolute top-10 left-0 bg-white rounded-lg shadow-xl p-2 z-20">
+                <Image
+                  src="/images/manual-region2.gif"
+                  alt="사용 방법 안내"
+                  width={300}
+                  height={200}
+                  className="rounded"
+                  unoptimized
+                />
+                <p className="text-xs text-gray-600 mt-2 text-center">
+                  영역의 모서리를 클릭하여 측정하세요
+                </p>
+              </div>
+            )}
           </div>
         )}
 
