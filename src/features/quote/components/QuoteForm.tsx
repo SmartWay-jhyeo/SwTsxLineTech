@@ -8,6 +8,7 @@ import { FinishTypeSelector } from "./FinishTypeSelector";
 import { ColorPicker } from "./ColorPicker";
 import { ContactForm } from "./ContactForm";
 import { LaneQuoteForm } from "./LaneQuoteForm";
+import { EpoxyQuoteForm } from "./EpoxyQuoteForm";
 
 type ServiceType = "lane" | "epoxy" | "paint";
 type FinishType = "glossy" | "matte" | "satin";
@@ -81,6 +82,11 @@ export function QuoteForm({ serviceType }: QuoteFormProps) {
   // 차선/주차선은 전용 폼 사용
   if (serviceType === "lane") {
     return <LaneQuoteForm />;
+  }
+
+  // 에폭시/바닥 시공은 전용 폼 사용
+  if (serviceType === "epoxy") {
+    return <EpoxyQuoteForm />;
   }
 
   return (
