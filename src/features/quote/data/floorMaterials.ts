@@ -251,3 +251,30 @@ export function requiresColorMixingFee(materialId: MaterialId, colorId: ColorId)
 
   return !material.baseColors.includes(colorId);
 }
+
+// ==========================================
+// 가격 데이터 (부가세 별도)
+// ==========================================
+
+// 마감재별 기본 단가 (m² 당)
+export const MATERIAL_PRICES: Record<MaterialId, number> = {
+  transparent_epoxy: 45000,    // 투명 에폭시 (평당 15만원)
+  solid_epoxy: 45000,          // 칼라 에폭시 - 일반 바닥상태 기준
+  bean_gravel: 55000,          // 콩자갈 (평당 18만원)
+  urethane_waterproof: 35000,  // 우레탄 방수 (평당 10만원)
+};
+
+// 칼라 에폭시 바닥 상태별 단가 (m² 당)
+export const FLOOR_CONDITION_PRICES: Record<FloorConditionId, number> = {
+  normal: 45000,           // 얇은 코팅 (롤러 시공)
+  poor_or_premium: 60000,  // 에폭시 라이닝 (두막형)
+};
+
+// 셀프레벨링 추가 단가 (m² 당)
+export const SELF_LEVELING_PRICE = 30000;
+
+// 조색비 (고정)
+export const COLOR_MIXING_FEE = 50000;
+
+// 최소 출장비
+export const MIN_SERVICE_FEE = 300000;
