@@ -162,18 +162,16 @@ export function LaneQuoteForm({ className }: LaneQuoteFormProps) {
         </div>
       </div>
 
-      {/* 2단 레이아웃 */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* 좌측: 지도 */}
-        <div>
-          <ParkingAreaMap
-            onAreaChange={setArea}
-            onAddressChange={setAddress}
-            onReset={handleFullReset}
-          />
-        </div>
+      {/* 단일 컬럼 레이아웃 */}
+      <div className="space-y-6">
+        {/* 지도 영역 (전체 가로 폭) */}
+        <ParkingAreaMap
+          onAreaChange={setArea}
+          onAddressChange={setAddress}
+          onReset={handleFullReset}
+        />
 
-        {/* 우측: 옵션 */}
+        {/* 하단: 옵션 영역 */}
         <div className="space-y-6">
           {/* 측정 면적 표시 */}
           {area > 0 && (
