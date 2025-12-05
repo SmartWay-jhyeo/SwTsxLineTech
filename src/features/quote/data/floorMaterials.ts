@@ -69,7 +69,7 @@ export const FLOOR_MATERIALS: FloorMaterial[] = [
     description: "콘크리트 질감을 살리는 투명 코팅",
     allowedFinishes: ["gloss", "semi_gloss", "matte"],
     allowedColors: ["clear"],
-    thumbnail: `/images/epoxy/투명에폭시_유광.jpg${IMG_VERSION}`
+    thumbnail: `/images/epoxy/transparent_gloss.jpg${IMG_VERSION}`
   },
   {
     id: "solid_epoxy",
@@ -78,7 +78,7 @@ export const FLOOR_MATERIALS: FloorMaterial[] = [
     allowedFinishes: ["gloss", "semi_gloss", "matte"],
     allowedColors: ["gray", "green", "blue", "red", "yellow", "black"],
     baseColors: ["gray", "green"],  // 조색비 없음
-    thumbnail: `/images/epoxy/컬러에폭시_회색_유광(지하주차장).jpg${IMG_VERSION}`
+    thumbnail: `/images/epoxy/color_gray_gloss.jpg${IMG_VERSION}`
   },
   {
     id: "bean_gravel",
@@ -86,7 +86,7 @@ export const FLOOR_MATERIALS: FloorMaterial[] = [
     description: "자연 자갈을 에폭시와 섞어 미장",
     allowedFinishes: ["natural"],
     allowedColors: ["beige", "white", "dark_pearl", "mix"],
-    thumbnail: `/images/epoxy/콩자갈_베이지.jpg${IMG_VERSION}`
+    thumbnail: `/images/epoxy/gravel_beige.jpg${IMG_VERSION}`
   },
   {
     id: "urethane_waterproof",
@@ -94,7 +94,7 @@ export const FLOOR_MATERIALS: FloorMaterial[] = [
     description: "옥상/실외 주차장 방수",
     allowedFinishes: ["gloss"],
     allowedColors: ["green", "gray"],
-    thumbnail: `/images/epoxy/우레탄방수_초록색유광(빌라옥상).jpg${IMG_VERSION}`
+    thumbnail: `/images/epoxy/urethane_green.jpg${IMG_VERSION}`
   }
 ];
 
@@ -124,38 +124,38 @@ export const COLORS: Record<ColorId, Color> = {
 // 마감재별 이미지 갤러리
 export const MATERIAL_IMAGES: Record<MaterialId, { thumbnail: string; gallery: GalleryImage[] }> = {
   transparent_epoxy: {
-    thumbnail: `/images/epoxy/투명에폭시_유광.jpg${IMG_VERSION}`,
+    thumbnail: `/images/epoxy/transparent_gloss.jpg${IMG_VERSION}`,
     gallery: [
-      { src: `/images/epoxy/투명에폭시_유광.jpg${IMG_VERSION}`, label: "유광", finish: "gloss" },
-      { src: `/images/epoxy/투명에폭시_반광.jpg${IMG_VERSION}`, label: "반광", finish: "semi_gloss" },
-      { src: `/images/epoxy/투명에폭시_무광.jpg${IMG_VERSION}`, label: "무광", finish: "matte" },
+      { src: `/images/epoxy/transparent_gloss.jpg${IMG_VERSION}`, label: "유광", finish: "gloss" },
+      { src: `/images/epoxy/transparent_semi.jpg${IMG_VERSION}`, label: "반광", finish: "semi_gloss" },
+      { src: `/images/epoxy/transparent_matte.jpg${IMG_VERSION}`, label: "무광", finish: "matte" },
     ]
   },
   solid_epoxy: {
-    thumbnail: `/images/epoxy/컬러에폭시_회색_유광(지하주차장).jpg${IMG_VERSION}`,
+    thumbnail: `/images/epoxy/color_gray_gloss.jpg${IMG_VERSION}`,
     gallery: [
-      { src: `/images/epoxy/컬러에폭시_회색_유광(지하주차장).jpg${IMG_VERSION}`, label: "회색", color: "gray" },
-      { src: `/images/epoxy/컬러에폭시_초록색_유광(지하주차장).jpg${IMG_VERSION}`, label: "초록색", color: "green" },
-      { src: `/images/epoxy/컬러에폭시_파란색_유광(전시회).jpg${IMG_VERSION}`, label: "파란색", color: "blue" },
-      { src: `/images/epoxy/컬러에폭시_빨간색_유광(전시회).jpg${IMG_VERSION}`, label: "빨간색", color: "red" },
-      { src: `/images/epoxy/컬러에폭시_노란색_유광(모델하우스).jpg${IMG_VERSION}`, label: "노란색", color: "yellow" },
-      { src: `/images/epoxy/컬러에폭시_검은색_유광(모델하우스).jpg${IMG_VERSION}`, label: "검은색", color: "black" },
+      { src: `/images/epoxy/color_gray_gloss.jpg${IMG_VERSION}`, label: "회색", color: "gray" },
+      { src: `/images/epoxy/color_green_gloss.jpg${IMG_VERSION}`, label: "초록색", color: "green" },
+      { src: `/images/epoxy/color_blue_gloss.jpg${IMG_VERSION}`, label: "파란색", color: "blue" },
+      { src: `/images/epoxy/color_red_gloss.jpg${IMG_VERSION}`, label: "빨간색", color: "red" },
+      { src: `/images/epoxy/color_yellow_gloss.jpg${IMG_VERSION}`, label: "노란색", color: "yellow" },
+      { src: `/images/epoxy/color_black_gloss.jpg${IMG_VERSION}`, label: "검은색", color: "black" },
     ]
   },
   bean_gravel: {
-    thumbnail: `/images/epoxy/콩자갈_베이지.jpg${IMG_VERSION}`,
+    thumbnail: `/images/epoxy/gravel_beige.jpg${IMG_VERSION}`,
     gallery: [
-      { src: `/images/epoxy/콩자갈_베이지.jpg${IMG_VERSION}`, label: "베이지", color: "beige" },
-      { src: `/images/epoxy/콩자갈_화이트.jpg${IMG_VERSION}`, label: "화이트", color: "white" },
-      { src: `/images/epoxy/콩자갈_믹스.jpg${IMG_VERSION}`, label: "믹스", color: "mix" },
-      { src: `/images/epoxy/콩자갈_흑진주.jpg${IMG_VERSION}`, label: "흑진주", color: "dark_pearl" },
+      { src: `/images/epoxy/gravel_beige.jpg${IMG_VERSION}`, label: "베이지", color: "beige" },
+      { src: `/images/epoxy/gravel_white.jpg${IMG_VERSION}`, label: "화이트", color: "white" },
+      { src: `/images/epoxy/gravel_mix.jpg${IMG_VERSION}`, label: "믹스", color: "mix" },
+      { src: `/images/epoxy/gravel_darkpearl.jpg${IMG_VERSION}`, label: "흑진주", color: "dark_pearl" },
     ]
   },
   urethane_waterproof: {
-    thumbnail: `/images/epoxy/우레탄방수_초록색유광(빌라옥상).jpg${IMG_VERSION}`,
+    thumbnail: `/images/epoxy/urethane_green.jpg${IMG_VERSION}`,
     gallery: [
-      { src: `/images/epoxy/우레탄방수_초록색유광(빌라옥상).jpg${IMG_VERSION}`, label: "초록색", color: "green" },
-      { src: `/images/epoxy/우레탄방수_회색유광(빌라옥상).jpg${IMG_VERSION}`, label: "회색", color: "gray" },
+      { src: `/images/epoxy/urethane_green.jpg${IMG_VERSION}`, label: "초록색", color: "green" },
+      { src: `/images/epoxy/urethane_gray.jpg${IMG_VERSION}`, label: "회색", color: "gray" },
     ]
   }
 };
@@ -165,7 +165,7 @@ export const SELF_LEVELING = {
   id: "self_leveling",
   name: "셀프레벨링",
   description: "바닥 수평 맞추기 기초작업 (선택)",
-  thumbnail: `/images/epoxy/셀프레벨링.jpg${IMG_VERSION}`
+  thumbnail: `/images/epoxy/self_leveling.jpg${IMG_VERSION}`
 };
 
 // 바닥 상태 타입 (칼라 에폭시용)
