@@ -278,3 +278,93 @@ export const COLOR_MIXING_FEE = 50000;
 
 // 최소 출장비
 export const MIN_SERVICE_FEE = 300000;
+
+// ==========================================
+// 새로운 면적별/옵션별 가격 체계 (고객 친화적 용어)
+// ==========================================
+
+/**
+ * 면적에 따른 기본 단가 계산
+ * - 500㎡ 이상: 35,000원/㎡
+ * - 300-499㎡: 40,000원/㎡
+ * - 101-299㎡: 45,000원/㎡
+ * - 100㎡ 미만: 65,000원/㎡
+ */
+export function getBasePriceByArea(area: number): number {
+  if (area >= 500) return 35000;
+  if (area >= 300) return 40000;
+  if (area >= 101) return 45000;
+  return 65000; // 100㎡ 미만
+}
+
+// 바닥 상태 타입 (고객 친화적)
+export type FloorQualityId = "good" | "normal" | "poor";
+
+// 바닥 상태 옵션 (고객 친화적 설명)
+export const FLOOR_QUALITY: Record<FloorQualityId, {
+  name: string;
+  description: string;
+  price: number;
+}> = {
+  good: {
+    name: "양호",
+    description: "바닥이 깨끗하고 평평함",
+    price: 0
+  },
+  normal: {
+    name: "보통",
+    description: "일반적인 바닥 상태",
+    price: 0
+  },
+  poor: {
+    name: "불량",
+    description: "균열이 많거나 파손이 심함",
+    price: 15000  // ㎡당 추가 비용
+  }
+};
+
+// 균열 상태 타입 (고객 친화적)
+export type CrackConditionId = "minor" | "moderate" | "severe";
+
+// 균열 상태 옵션 (고객 친화적 설명)
+export const CRACK_CONDITION: Record<CrackConditionId, {
+  name: string;
+  description: string;
+  price: number;
+}> = {
+  minor: {
+    name: "미세",
+    description: "눈에 거의 보이지 않는 작은 균열",
+    price: 0
+  },
+  moderate: {
+    name: "보통",
+    description: "일부 균열이 있으나 심하지 않음",
+    price: 0
+  },
+  severe: {
+    name: "심각",
+    description: "큰 균열 또는 누수 의심",
+    price: 30000  // ㎡당 추가 비용
+  }
+};
+
+// 미끄럼 방지 처리 (기존 "엠보 시공")
+export const ANTI_SLIP = {
+  id: "anti_slip",
+  name: "미끄럼 방지 처리",
+  description: "바닥에 요철을 만들어 미끄럼을 방지합니다",
+  price: 7500  // ㎡당 추가 비용 (5,000-10,000 평균)
+};
+
+// 표면 보호막 (기존 "상도 코팅")
+export const SURFACE_PROTECTION = {
+  id: "surface_protection",
+  name: "표면 보호막 추가",
+  description: "마모와 오염을 더 잘 방지합니다",
+  price: 7500  // ㎡당 추가 비용 (5,000-10,000 평균)
+};
+
+// 평(pyeong) 변환 상수
+export const SQM_TO_PYEONG = 0.3025;  // 1㎡ = 0.3025평
+export const PYEONG_TO_SQM = 3.3058;  // 1평 = 3.3058㎡

@@ -2,7 +2,8 @@
 
 import { useState, useMemo, useRef } from "react";
 import Image from "next/image";
-import { ArrowRight, Check, ChevronLeft, ChevronRight, AlertCircle, ChevronUp, Calculator, Loader2 } from "lucide-react";
+import { ArrowRight, Check, ChevronLeft, ChevronRight, AlertCircle, ChevronUp, ChevronDown, Calculator, Loader2, Upload, X } from "lucide-react";
+import imageCompression from "browser-image-compression";
 import { submitQuote, type EpoxyQuoteInput } from "../actions";
 import { cn } from "@/lib/utils";
 import {
@@ -13,6 +14,11 @@ import {
   SELF_LEVELING,
   FLOOR_CONDITIONS,
   MATERIAL_OPTIONS_CONFIG,
+  FLOOR_QUALITY,
+  CRACK_CONDITION,
+  ANTI_SLIP,
+  SURFACE_PROTECTION,
+  SQM_TO_PYEONG,
   getFinishesForMaterial,
   getColorsForMaterial,
   requiresColorMixingFee,
@@ -20,6 +26,8 @@ import {
   type FinishId,
   type ColorId,
   type FloorConditionId,
+  type FloorQualityId,
+  type CrackConditionId,
 } from "../data/floorMaterials";
 import {
   calculateEpoxyPrice,
@@ -46,6 +54,18 @@ export function EpoxyQuoteForm() {
     phone: "",
     notes: "",
   });
+
+  // 신규 옵션 (고객 친화적)
+  const [floorQuality, setFloorQuality] = useState<FloorQualityId>("normal"); // 기본값: 보통
+  const [crackCondition, setCrackCondition] = useState<CrackConditionId>("moderate"); // 기본값: 보통
+  const [includeAntiSlip, setIncludeAntiSlip] = useState(false);
+  const [includeSurfaceProtection, setIncludeSurfaceProtection] = useState(false);
+  const [isAdvancedOpen, setIsAdvancedOpen] = useState(false); // 고급 옵션 접기/펼치기
+
+  // 사진 첨부
+  const [photos, setPhotos] = useState<File[]>([]);
+  const [photoPreviewUrls, setPhotoPreviewUrls] = useState<string[]>([]);
+  const [isCompressing, setIsCompressing] = useState(false);
 
   // 모바일 견적 패널 펼침 상태
   const [isMobilePanelOpen, setIsMobilePanelOpen] = useState(false);
@@ -102,7 +122,7 @@ export function EpoxyQuoteForm() {
     return requiresColorMixingFee(selectedMaterial, selectedColor);
   }, [selectedMaterial, selectedColor]);
 
-  // 가격 계산
+  // 가격 계산 (신규 옵션 포함)
   const priceBreakdown = useMemo((): PriceBreakdown | null => {
     if (!selectedMaterial) return null;
 
@@ -113,10 +133,14 @@ export function EpoxyQuoteForm() {
       materialId: selectedMaterial,
       area: areaNum,
       floorCondition: floorCondition || undefined,
+      floorQuality, // 신규
+      crackCondition, // 신규
+      includeAntiSlip, // 신규
+      includeSurfaceProtection, // 신규
       includeSelfLeveling,
       needsColorMixingFee,
     });
-  }, [selectedMaterial, area, floorCondition, includeSelfLeveling, needsColorMixingFee]);
+  }, [selectedMaterial, area, floorCondition, floorQuality, crackCondition, includeAntiSlip, includeSurfaceProtection, includeSelfLeveling, needsColorMixingFee]);
 
   // 현재 마감재 정보
   const currentMaterial = useMemo(() => {
@@ -132,6 +156,64 @@ export function EpoxyQuoteForm() {
       left: direction === "left" ? -scrollAmount : scrollAmount,
       behavior: "smooth",
     });
+  };
+
+  // 사진 압축 및 업로드 핸들러
+  const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    // 최대 3장 제한
+    if (photos.length + files.length > 3) {
+      alert("사진은 최대 3장까지 첨부 가능합니다.");
+      return;
+    }
+
+    setIsCompressing(true);
+
+    try {
+      const compressedFiles: File[] = [];
+      const previewUrls: string[] = [];
+
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+
+        // 이미지 압축 옵션
+        const options = {
+          maxSizeMB: 0.3, // 최대 300KB
+          maxWidthOrHeight: 1920, // 최대 너비/높이
+          useWebWorker: true,
+          fileType: "image/jpeg", // JPEG로 변환
+        };
+
+        // 압축 실행
+        const compressedFile = await imageCompression(file, options);
+        compressedFiles.push(compressedFile);
+
+        // 미리보기 URL 생성
+        const previewUrl = URL.createObjectURL(compressedFile);
+        previewUrls.push(previewUrl);
+      }
+
+      setPhotos(prev => [...prev, ...compressedFiles]);
+      setPhotoPreviewUrls(prev => [...prev, ...previewUrls]);
+    } catch (error) {
+      console.error("사진 압축 실패:", error);
+      alert("사진 처리 중 오류가 발생했습니다.");
+    } finally {
+      setIsCompressing(false);
+      // input 초기화
+      e.target.value = "";
+    }
+  };
+
+  // 사진 삭제 핸들러
+  const handlePhotoRemove = (index: number) => {
+    // 미리보기 URL 해제
+    URL.revokeObjectURL(photoPreviewUrls[index]);
+
+    setPhotos(prev => prev.filter((_, i) => i !== index));
+    setPhotoPreviewUrls(prev => prev.filter((_, i) => i !== index));
   };
 
   // 제출 핸들러
@@ -287,7 +369,7 @@ export function EpoxyQuoteForm() {
 
         {/* 항목별 가격 */}
         <div className="space-y-3 mb-4">
-          {/* 기본 시공비 */}
+          {/* 기본 시공비 (면적별 차등 가격) */}
           <div>
             <div className="flex justify-between items-start text-sm">
               <div>
@@ -300,10 +382,62 @@ export function EpoxyQuoteForm() {
               </div>
             </div>
             <div className="flex justify-between items-center text-xs text-white/50 mt-0.5">
-              <span>{formatPrice(priceBreakdown.basePricePerM2)}/m² × {areaNum}</span>
+              <span>{formatPrice(priceBreakdown.basePricePerM2)}/m²({formatPrice(Math.round(priceBreakdown.basePricePerM2 * SQM_TO_PYEONG))}/평) × {areaNum}</span>
               <span className="text-white">{formatPrice(priceBreakdown.basePrice)}</span>
             </div>
           </div>
+
+          {/* 바닥 상태 추가 비용 (신규) */}
+          {priceBreakdown.floorQualityPrice > 0 && (
+            <div>
+              <div className="flex justify-between items-center text-sm">
+                <span className="text-orange-400">+ 바닥 보수 작업</span>
+              </div>
+              <div className="flex justify-between items-center text-xs text-white/50 mt-0.5">
+                <span>15,000원/m² × {areaNum}</span>
+                <span className="text-orange-400">{formatPrice(priceBreakdown.floorQualityPrice)}</span>
+              </div>
+            </div>
+          )}
+
+          {/* 균열 보수 추가 비용 (신규) */}
+          {priceBreakdown.crackRepairPrice > 0 && (
+            <div>
+              <div className="flex justify-between items-center text-sm">
+                <span className="text-red-400">+ 균열 보수</span>
+              </div>
+              <div className="flex justify-between items-center text-xs text-white/50 mt-0.5">
+                <span>30,000원/m² × {areaNum}</span>
+                <span className="text-red-400">{formatPrice(priceBreakdown.crackRepairPrice)}</span>
+              </div>
+            </div>
+          )}
+
+          {/* 미끄럼 방지 처리 (신규) */}
+          {priceBreakdown.antiSlipPrice > 0 && (
+            <div>
+              <div className="flex justify-between items-center text-sm">
+                <span className="text-blue-400">+ {ANTI_SLIP.name}</span>
+              </div>
+              <div className="flex justify-between items-center text-xs text-white/50 mt-0.5">
+                <span>{formatPrice(ANTI_SLIP.price)}/m² × {areaNum}</span>
+                <span className="text-blue-400">{formatPrice(priceBreakdown.antiSlipPrice)}</span>
+              </div>
+            </div>
+          )}
+
+          {/* 표면 보호막 (신규) */}
+          {priceBreakdown.surfaceProtectionPrice > 0 && (
+            <div>
+              <div className="flex justify-between items-center text-sm">
+                <span className="text-purple-400">+ {SURFACE_PROTECTION.name}</span>
+              </div>
+              <div className="flex justify-between items-center text-xs text-white/50 mt-0.5">
+                <span>{formatPrice(SURFACE_PROTECTION.price)}/m² × {areaNum}</span>
+                <span className="text-purple-400">{formatPrice(priceBreakdown.surfaceProtectionPrice)}</span>
+              </div>
+            </div>
+          )}
 
           {/* 셀프레벨링 */}
           {includeSelfLeveling && priceBreakdown.selfLevelingPrice > 0 && (
@@ -682,7 +816,190 @@ export function EpoxyQuoteForm() {
           </section>
         )}
 
-        {/* 8. 연락처 정보 */}
+        {/* 8. 추가 옵션 (미끄럼 방지, 표면 보호막) */}
+        <section className="space-y-3">
+          <h3 className="text-white text-sm font-medium">추가 옵션</h3>
+          <div className="space-y-3">
+            {/* 미끄럼 방지 처리 */}
+            <label className={cn(
+              "flex items-start gap-3 p-4 rounded-lg border cursor-pointer transition-colors",
+              includeAntiSlip
+                ? "bg-blue-500/10 border-blue-500/50"
+                : "bg-white/5 border-white/10 hover:border-white/20"
+            )}>
+              <input
+                type="checkbox"
+                checked={includeAntiSlip}
+                onChange={(e) => setIncludeAntiSlip(e.target.checked)}
+                className="mt-0.5 w-5 h-5 rounded border-white/30 bg-transparent text-blue-500 focus:ring-blue-500 focus:ring-offset-0"
+              />
+              <div className="flex-1">
+                <span className="text-white text-sm font-medium">{ANTI_SLIP.name}</span>
+                <p className="text-white/60 text-xs mt-1">{ANTI_SLIP.description}</p>
+                <p className="text-blue-400 text-xs mt-1">+{formatPrice(ANTI_SLIP.price)}/m²</p>
+              </div>
+            </label>
+
+            {/* 표면 보호막 */}
+            <label className={cn(
+              "flex items-start gap-3 p-4 rounded-lg border cursor-pointer transition-colors",
+              includeSurfaceProtection
+                ? "bg-purple-500/10 border-purple-500/50"
+                : "bg-white/5 border-white/10 hover:border-white/20"
+            )}>
+              <input
+                type="checkbox"
+                checked={includeSurfaceProtection}
+                onChange={(e) => setIncludeSurfaceProtection(e.target.checked)}
+                className="mt-0.5 w-5 h-5 rounded border-white/30 bg-transparent text-purple-500 focus:ring-purple-500 focus:ring-offset-0"
+              />
+              <div className="flex-1">
+                <span className="text-white text-sm font-medium">{SURFACE_PROTECTION.name}</span>
+                <p className="text-white/60 text-xs mt-1">{SURFACE_PROTECTION.description}</p>
+                <p className="text-purple-400 text-xs mt-1">+{formatPrice(SURFACE_PROTECTION.price)}/m²</p>
+              </div>
+            </label>
+          </div>
+        </section>
+
+        {/* 9. 고급 옵션 (접기/펼치기) */}
+        <section className="space-y-3">
+          <button
+            type="button"
+            onClick={() => setIsAdvancedOpen(!isAdvancedOpen)}
+            className="w-full flex items-center justify-between p-4 rounded-lg border border-white/10 bg-white/5 hover:border-white/20 transition-colors"
+          >
+            <div className="flex items-center gap-2">
+              <span className="text-white text-sm font-medium">고급 옵션</span>
+              <span className="text-xs text-white/50 bg-white/10 px-2 py-0.5 rounded">선택사항</span>
+            </div>
+            {isAdvancedOpen ? <ChevronUp size={18} className="text-white/70" /> : <ChevronDown size={18} className="text-white/70" />}
+          </button>
+
+          {isAdvancedOpen && (
+            <div className="space-y-4 p-4 rounded-lg border border-white/10 bg-white/5">
+              {/* 바닥 상태 */}
+              <div className="space-y-2">
+                <label className="text-white text-sm font-medium block">현재 바닥 상태</label>
+                <div className="space-y-2">
+                  {(Object.entries(FLOOR_QUALITY) as [FloorQualityId, typeof FLOOR_QUALITY[FloorQualityId]][]).map(([id, quality]) => (
+                    <label
+                      key={id}
+                      className={cn(
+                        "flex items-start gap-3 p-3 rounded-lg border cursor-pointer transition-all text-sm",
+                        floorQuality === id
+                          ? "bg-primary/10 border-primary"
+                          : "bg-transparent border-white/10 hover:border-white/20"
+                      )}
+                    >
+                      <input
+                        type="radio"
+                        name="floorQuality"
+                        checked={floorQuality === id}
+                        onChange={() => setFloorQuality(id)}
+                        className="mt-0.5 w-4 h-4 text-primary focus:ring-primary focus:ring-offset-0"
+                      />
+                      <div className="flex-1">
+                        <span className="text-white font-medium">{quality.name}</span>
+                        <p className="text-white/60 text-xs mt-0.5">{quality.description}</p>
+                        {quality.price > 0 && (
+                          <p className="text-orange-400 text-xs mt-1">+{formatPrice(quality.price)}/m²</p>
+                        )}
+                      </div>
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              {/* 균열 상태 */}
+              <div className="space-y-2">
+                <label className="text-white text-sm font-medium block">바닥 균열 정도</label>
+                <div className="space-y-2">
+                  {(Object.entries(CRACK_CONDITION) as [CrackConditionId, typeof CRACK_CONDITION[CrackConditionId]][]).map(([id, condition]) => (
+                    <label
+                      key={id}
+                      className={cn(
+                        "flex items-start gap-3 p-3 rounded-lg border cursor-pointer transition-all text-sm",
+                        crackCondition === id
+                          ? "bg-primary/10 border-primary"
+                          : "bg-transparent border-white/10 hover:border-white/20"
+                      )}
+                    >
+                      <input
+                        type="radio"
+                        name="crackCondition"
+                        checked={crackCondition === id}
+                        onChange={() => setCrackCondition(id)}
+                        className="mt-0.5 w-4 h-4 text-primary focus:ring-primary focus:ring-offset-0"
+                      />
+                      <div className="flex-1">
+                        <span className="text-white font-medium">{condition.name}</span>
+                        <p className="text-white/60 text-xs mt-0.5">{condition.description}</p>
+                        {condition.price > 0 && (
+                          <p className="text-red-400 text-xs mt-1">+{formatPrice(condition.price)}/m²</p>
+                        )}
+                      </div>
+                    </label>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+        </section>
+
+        {/* 10. 사진 첨부 */}
+        <section className="space-y-3">
+          <h3 className="text-white text-sm font-medium flex items-center gap-2">
+            바닥 사진 첨부
+            <span className="text-xs text-white/50 bg-white/10 px-2 py-0.5 rounded">선택사항</span>
+          </h3>
+          <p className="text-white/50 text-xs">바닥 상태 사진을 첨부하시면 더 정확한 견적을 드릴 수 있습니다 (최대 3장)</p>
+
+          {/* 사진 미리보기 */}
+          {photoPreviewUrls.length > 0 && (
+            <div className="grid grid-cols-3 gap-2">
+              {photoPreviewUrls.map((url, index) => (
+                <div key={index} className="relative aspect-square rounded-lg overflow-hidden border border-white/10">
+                  <Image src={url} alt={`사진 ${index + 1}`} fill className="object-cover" sizes="150px" />
+                  <button
+                    type="button"
+                    onClick={() => handlePhotoRemove(index)}
+                    className="absolute top-1 right-1 w-6 h-6 bg-black/70 rounded-full flex items-center justify-center hover:bg-black/90 transition-colors"
+                  >
+                    <X size={14} className="text-white" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* 업로드 버튼 */}
+          {photos.length < 3 && (
+            <label className="flex items-center justify-center gap-2 w-full p-4 rounded-lg border-2 border-dashed border-white/20 hover:border-primary/50 cursor-pointer transition-colors bg-white/5">
+              <input
+                type="file"
+                accept="image/*"
+                multiple
+                onChange={handlePhotoUpload}
+                className="hidden"
+                disabled={isCompressing}
+              />
+              {isCompressing ? (
+                <>
+                  <Loader2 size={18} className="text-primary animate-spin" />
+                  <span className="text-white/70 text-sm">압축 중...</span>
+                </>
+              ) : (
+                <>
+                  <Upload size={18} className="text-primary" />
+                  <span className="text-white/70 text-sm">사진 선택 ({photos.length}/3)</span>
+                </>
+              )}
+            </label>
+          )}
+        </section>
+
+        {/* 11. 연락처 정보 */}
         <section className="space-y-3">
           <h3 className="text-white text-sm font-medium">시공 정보</h3>
           <div className="space-y-3">
