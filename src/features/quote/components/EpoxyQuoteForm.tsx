@@ -58,8 +58,8 @@ export function EpoxyQuoteForm() {
   // 신규 옵션 (고객 친화적)
   const [floorQuality, setFloorQuality] = useState<FloorQualityId>("normal"); // 기본값: 보통
   const [crackCondition, setCrackCondition] = useState<CrackConditionId>("moderate"); // 기본값: 보통
-  const [includeAntiSlip, setIncludeAntiSlip] = useState(false);
-  const [includeSurfaceProtection, setIncludeSurfaceProtection] = useState(false);
+  type CoatingType = "none" | "anti_slip" | "surface_protection";
+  const [coatingType, setCoatingType] = useState<CoatingType>("none");
   const [isAdvancedOpen, setIsAdvancedOpen] = useState(false); // 고급 옵션 접기/펼치기
 
   // 사진 첨부
@@ -135,12 +135,12 @@ export function EpoxyQuoteForm() {
       floorCondition: floorCondition || undefined,
       floorQuality, // 신규
       crackCondition, // 신규
-      includeAntiSlip, // 신규
-      includeSurfaceProtection, // 신규
+      includeAntiSlip: coatingType === "anti_slip", // 신규 (라디오 버튼)
+      includeSurfaceProtection: coatingType === "surface_protection", // 신규 (라디오 버튼)
       includeSelfLeveling,
       needsColorMixingFee,
     });
-  }, [selectedMaterial, area, floorCondition, floorQuality, crackCondition, includeAntiSlip, includeSurfaceProtection, includeSelfLeveling, needsColorMixingFee]);
+  }, [selectedMaterial, area, floorCondition, floorQuality, crackCondition, coatingType, includeSelfLeveling, needsColorMixingFee]);
 
   // 현재 마감재 정보
   const currentMaterial = useMemo(() => {
@@ -280,6 +280,13 @@ export function EpoxyQuoteForm() {
         floorCondition: condition?.name,
         applicationMethod: condition?.method,
         location: contactData.location,
+        // 신규 옵션
+        floorQuality: FLOOR_QUALITY[floorQuality].name,
+        crackCondition: CRACK_CONDITION[crackCondition].name,
+        antiSlip: coatingType === "anti_slip",
+        surfaceProtection: coatingType === "surface_protection",
+        // 사진 URL은 나중에 Supabase Storage 연동 시 추가
+        // photoUrls: uploadedPhotoUrls,
       },
       base_cost: priceBreakdown?.basePrice || 0,
       option_cost: (priceBreakdown?.selfLevelingPrice || 0) + (priceBreakdown?.colorMixingFee || 0),
@@ -581,7 +588,7 @@ export function EpoxyQuoteForm() {
         {/* 3. 이미지 갤러리 (마감재 선택 시) */}
         {selectedMaterial && currentGallery.length > 0 && (
           <section className="space-y-3">
-            <h3 className="text-white text-sm font-medium">시공 예시</h3>
+            <h3 className="text-white text-sm font-medium">광택 선택</h3>
             <div className="relative">
               {/* 좌측 스크롤 버튼 */}
               <button
@@ -599,14 +606,23 @@ export function EpoxyQuoteForm() {
                 style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
               >
                 {currentGallery.map((image, index) => (
-                  <div
+                  <button
                     key={index}
+                    type="button"
+                    onClick={() => {
+                      if (image.finish) {
+                        setSelectedFinish(image.finish);
+                      }
+                    }}
+                    disabled={!image.finish}
                     className={cn(
                       "relative shrink-0 w-[calc((100%-5rem-0.75rem)/2)] aspect-[4/3] rounded-lg overflow-hidden border-2 transition-all",
-                      // 색상 또는 광택이 일치하면 하이라이트
-                      (image.color && image.color === selectedColor) ||
-                      (image.finish && image.finish === selectedFinish)
-                        ? "border-primary"
+                      image.finish ? "cursor-pointer" : "cursor-default",
+                      // 광택이 일치하면 하이라이트
+                      image.finish && image.finish === selectedFinish
+                        ? "border-primary ring-2 ring-primary/30"
+                        : image.finish
+                        ? "border-transparent hover:border-white/30"
                         : "border-transparent"
                     )}
                   >
@@ -617,10 +633,24 @@ export function EpoxyQuoteForm() {
                       className="object-cover"
                       sizes="200px"
                     />
+
+                    {/* 선택 체크 표시 */}
+                    {image.finish && image.finish === selectedFinish && (
+                      <div className="absolute top-2 right-2 w-6 h-6 bg-primary rounded-full flex items-center justify-center">
+                        <Check size={14} className="text-white" />
+                      </div>
+                    )}
+
+                    {/* 광택 설명 텍스트 */}
                     <div className="absolute bottom-0 left-0 right-0 bg-black/60 px-2 py-1">
-                      <p className="text-white text-xs text-center">{image.label}</p>
+                      <p className="text-white text-xs text-center">
+                        {image.finish === "gloss" && "반짝이는 광택"}
+                        {image.finish === "semi_gloss" && "은은한 광택"}
+                        {image.finish === "matte" && "광택 없음"}
+                        {!image.finish && image.label}
+                      </p>
                     </div>
-                  </div>
+                  </button>
                 ))}
               </div>
 
@@ -636,33 +666,7 @@ export function EpoxyQuoteForm() {
           </section>
         )}
 
-        {/* 4. 광택 선택 (마감재에 따라 동적) */}
-        {selectedMaterial && availableFinishes.length > 0 && (
-          <section className="space-y-3">
-            <h3 className="text-white text-sm font-medium">광택 선택</h3>
-            <div className="flex flex-wrap gap-2">
-              {availableFinishes.map((finish) => (
-                <button
-                  key={finish.id}
-                  type="button"
-                  onClick={() => setSelectedFinish(finish.id)}
-                  className={cn(
-                    "px-4 py-2.5 rounded-lg transition-all duration-200",
-                    "border text-sm",
-                    selectedFinish === finish.id
-                      ? "bg-primary border-primary text-white"
-                      : "bg-transparent border-white/20 text-white/70 hover:border-white/40"
-                  )}
-                >
-                  <span>{finish.name}</span>
-                  <span className="block text-xs opacity-70">{finish.description}</span>
-                </button>
-              ))}
-            </div>
-          </section>
-        )}
-
-        {/* 5. 색상 선택 (마감재에 따라 동적) */}
+        {/* 4. 색상 선택 (마감재에 따라 동적) */}
         {selectedMaterial && availableColors.length > 0 && (
           <section className="space-y-3">
             <h3 className="text-white text-sm font-medium">색상 선택</h3>
@@ -816,22 +820,43 @@ export function EpoxyQuoteForm() {
           </section>
         )}
 
-        {/* 8. 추가 옵션 (미끄럼 방지, 표면 보호막) */}
+        {/* 8. 추가 옵션 (미끄럼 방지 vs 표면 보호막 - 라디오 버튼) */}
         <section className="space-y-3">
-          <h3 className="text-white text-sm font-medium">추가 옵션</h3>
+          <h3 className="text-white text-sm font-medium">추가 옵션 (선택사항)</h3>
           <div className="space-y-3">
+            {/* 선택 안 함 */}
+            <label className={cn(
+              "flex items-start gap-3 p-4 rounded-lg border cursor-pointer transition-colors",
+              coatingType === "none"
+                ? "bg-white/10 border-primary"
+                : "bg-white/5 border-white/10 hover:border-white/20"
+            )}>
+              <input
+                type="radio"
+                name="coatingType"
+                checked={coatingType === "none"}
+                onChange={() => setCoatingType("none")}
+                className="mt-0.5 w-5 h-5 text-primary focus:ring-primary"
+              />
+              <div className="flex-1">
+                <span className="text-white text-sm font-medium">선택 안 함</span>
+                <p className="text-white/60 text-xs mt-1">추가 옵션을 선택하지 않습니다</p>
+              </div>
+            </label>
+
             {/* 미끄럼 방지 처리 */}
             <label className={cn(
               "flex items-start gap-3 p-4 rounded-lg border cursor-pointer transition-colors",
-              includeAntiSlip
+              coatingType === "anti_slip"
                 ? "bg-blue-500/10 border-blue-500/50"
                 : "bg-white/5 border-white/10 hover:border-white/20"
             )}>
               <input
-                type="checkbox"
-                checked={includeAntiSlip}
-                onChange={(e) => setIncludeAntiSlip(e.target.checked)}
-                className="mt-0.5 w-5 h-5 rounded border-white/30 bg-transparent text-blue-500 focus:ring-blue-500 focus:ring-offset-0"
+                type="radio"
+                name="coatingType"
+                checked={coatingType === "anti_slip"}
+                onChange={() => setCoatingType("anti_slip")}
+                className="mt-0.5 w-5 h-5 text-blue-500 focus:ring-blue-500"
               />
               <div className="flex-1">
                 <span className="text-white text-sm font-medium">{ANTI_SLIP.name}</span>
@@ -843,15 +868,16 @@ export function EpoxyQuoteForm() {
             {/* 표면 보호막 */}
             <label className={cn(
               "flex items-start gap-3 p-4 rounded-lg border cursor-pointer transition-colors",
-              includeSurfaceProtection
+              coatingType === "surface_protection"
                 ? "bg-purple-500/10 border-purple-500/50"
                 : "bg-white/5 border-white/10 hover:border-white/20"
             )}>
               <input
-                type="checkbox"
-                checked={includeSurfaceProtection}
-                onChange={(e) => setIncludeSurfaceProtection(e.target.checked)}
-                className="mt-0.5 w-5 h-5 rounded border-white/30 bg-transparent text-purple-500 focus:ring-purple-500 focus:ring-offset-0"
+                type="radio"
+                name="coatingType"
+                checked={coatingType === "surface_protection"}
+                onChange={() => setCoatingType("surface_protection")}
+                className="mt-0.5 w-5 h-5 text-purple-500 focus:ring-purple-500"
               />
               <div className="flex-1">
                 <span className="text-white text-sm font-medium">{SURFACE_PROTECTION.name}</span>

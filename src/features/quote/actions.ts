@@ -44,6 +44,12 @@ export type EpoxyQuoteInput = BaseQuoteData & {
     floorCondition?: string;
     applicationMethod?: string;
     location?: string;
+    // 신규 옵션
+    floorQuality?: string;
+    crackCondition?: string;
+    antiSlip?: boolean;
+    surfaceProtection?: boolean;
+    photoUrls?: string[];
   };
   base_cost: number;
   option_cost: number;

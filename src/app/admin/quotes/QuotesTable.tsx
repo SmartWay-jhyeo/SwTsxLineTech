@@ -17,6 +17,23 @@ type Quote = {
   options: Record<string, unknown>;
 };
 
+type EpoxyOptions = {
+  material?: string;
+  finish?: string;
+  color?: string;
+  colorMixingFee?: boolean;
+  selfLeveling?: boolean;
+  floorCondition?: string;
+  applicationMethod?: string;
+  location?: string;
+  // 신규 옵션
+  floorQuality?: string;
+  crackCondition?: string;
+  antiSlip?: boolean;
+  surfaceProtection?: boolean;
+  photoUrls?: string[];
+};
+
 const STATUS_LABELS: Record<QuoteStatus, string> = {
   pending: "대기",
   confirmed: "확정",
@@ -135,12 +152,57 @@ export function QuotesTable({ quotes }: { quotes: Quote[] }) {
                         </>
                       ) : (
                         <>
-                          <div><span className="text-gray-500">마감재:</span> {(quote.options as { material?: string }).material || "-"}</div>
-                          {(quote.options as { finish?: string }).finish && <div><span className="text-gray-500">광택:</span> {(quote.options as { finish?: string }).finish}</div>}
-                          {(quote.options as { color?: string }).color && <div><span className="text-gray-500">색상:</span> {(quote.options as { color?: string }).color}</div>}
-                          {(quote.options as { floorCondition?: string }).floorCondition && <div><span className="text-gray-500">바닥:</span> {(quote.options as { floorCondition?: string }).floorCondition}</div>}
-                          {(quote.options as { selfLeveling?: boolean }).selfLeveling && <div><span className="text-gray-500">셀프레벨링:</span> 포함</div>}
-                          {(quote.options as { location?: string }).location && <div><span className="text-gray-500">장소:</span> {(quote.options as { location?: string }).location}</div>}
+                          <div><span className="text-gray-500">마감재:</span> {(quote.options as EpoxyOptions).material || "-"}</div>
+                          {(quote.options as EpoxyOptions).finish && (
+                            <div><span className="text-gray-500">광택:</span> {(quote.options as EpoxyOptions).finish}</div>
+                          )}
+                          {(quote.options as EpoxyOptions).color && (
+                            <div><span className="text-gray-500">색상:</span> {(quote.options as EpoxyOptions).color}</div>
+                          )}
+
+                          {/* 신규 옵션들 */}
+                          {(quote.options as EpoxyOptions).floorQuality && (
+                            <div><span className="text-gray-500">바닥 상태:</span> {(quote.options as EpoxyOptions).floorQuality}</div>
+                          )}
+                          {(quote.options as EpoxyOptions).crackCondition && (
+                            <div><span className="text-gray-500">균열 정도:</span> {(quote.options as EpoxyOptions).crackCondition}</div>
+                          )}
+                          {(quote.options as EpoxyOptions).antiSlip && (
+                            <div><span className="text-gray-500">추가 옵션:</span> 미끄럼 방지 처리</div>
+                          )}
+                          {(quote.options as EpoxyOptions).surfaceProtection && (
+                            <div><span className="text-gray-500">추가 옵션:</span> 표면 보호막</div>
+                          )}
+
+                          {(quote.options as EpoxyOptions).floorCondition && (
+                            <div><span className="text-gray-500">바닥:</span> {(quote.options as EpoxyOptions).floorCondition}</div>
+                          )}
+                          {(quote.options as EpoxyOptions).selfLeveling && (
+                            <div><span className="text-gray-500">셀프레벨링:</span> 포함</div>
+                          )}
+                          {(quote.options as EpoxyOptions).location && (
+                            <div><span className="text-gray-500">장소:</span> {(quote.options as EpoxyOptions).location}</div>
+                          )}
+
+                          {/* 사진 표시 */}
+                          {(quote.options as EpoxyOptions).photoUrls && (quote.options as EpoxyOptions).photoUrls!.length > 0 && (
+                            <div className="mt-2">
+                              <span className="text-gray-500">바닥 사진:</span>
+                              <div className="flex gap-1 mt-1">
+                                {(quote.options as EpoxyOptions).photoUrls!.map((url, idx) => (
+                                  <a
+                                    key={idx}
+                                    href={url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="block w-16 h-16 rounded border border-gray-300 overflow-hidden hover:ring-2 hover:ring-primary"
+                                  >
+                                    <img src={url} alt={`사진 ${idx + 1}`} className="w-full h-full object-cover" />
+                                  </a>
+                                ))}
+                              </div>
+                            </div>
+                          )}
                         </>
                       )}
                     </div>

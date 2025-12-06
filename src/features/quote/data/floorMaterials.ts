@@ -353,7 +353,7 @@ export const CRACK_CONDITION: Record<CrackConditionId, {
 export const ANTI_SLIP = {
   id: "anti_slip",
   name: "미끄럼 방지 처리",
-  description: "바닥에 요철을 만들어 미끄럼을 방지합니다",
+  description: "바닥에 요철을 만들어 미끄럼을 방지합니다. 가벼운 하중, 미관개선, 먼지방지, 일반 주차장이나 상가바닥",
   price: 7500  // ㎡당 추가 비용 (5,000-10,000 평균)
 };
 
@@ -361,7 +361,7 @@ export const ANTI_SLIP = {
 export const SURFACE_PROTECTION = {
   id: "surface_protection",
   name: "표면 보호막 추가",
-  description: "마모와 오염을 더 잘 방지합니다",
+  description: "마모와 오염을 더 잘 방지합니다. 중하중, 내마모성, 내충격성 강화, 공장, 창고, 물류센터 등",
   price: 7500  // ㎡당 추가 비용 (5,000-10,000 평균)
 };
 
