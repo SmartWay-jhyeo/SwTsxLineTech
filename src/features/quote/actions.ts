@@ -203,6 +203,11 @@ export async function uploadQuotePhotos(formData: FormData): Promise<{
     const uploadedUrls: string[] = [];
 
     for (const file of files) {
+      if (!file.size || file.size === 0) {
+        console.warn(`Skipping empty file: ${file.name}`);
+        continue;
+      }
+
       const fileExt = file.name.split(".").pop();
       const fileName = `${crypto.randomUUID()}.${fileExt}`;
 
@@ -214,7 +219,8 @@ export async function uploadQuotePhotos(formData: FormData): Promise<{
         });
 
       if (uploadError) {
-        console.error("Upload error:", uploadError);
+        console.error("Upload error detail:", uploadError);
+        // 실패해도 다음 파일 시도
         continue;
       }
 
@@ -223,6 +229,11 @@ export async function uploadQuotePhotos(formData: FormData): Promise<{
         .getPublicUrl(fileName);
 
       uploadedUrls.push(publicUrl);
+    }
+
+    // 하나라도 업로드 성공했으면 성공으로 간주, 아예 실패했으면 에러
+    if (uploadedUrls.length === 0 && files.length > 0) {
+      return { success: false, error: "모든 사진 업로드에 실패했습니다. (Storage 권한 또는 네트워크를 확인해주세요)" };
     }
 
     return { success: true, urls: uploadedUrls };
@@ -272,5 +283,64 @@ export async function deleteQuote(id: string, photoUrls?: string[]) {
       success: false,
       error: err instanceof Error ? err.message : "삭제 실패"
     };
+  }
+}
+
+// ==========================================
+// Pricing Rules (Dynamic Pricing)
+// ==========================================
+
+export type PricingRule = {
+  id: string;
+  service_type: string;
+  category: string;
+  key: string;
+  name: string;
+  value: number;
+  unit: string | null;
+  description: string | null;
+  updated_at: string;
+};
+
+/**
+ * Fetch all pricing rules
+ */
+export async function getPricingRules(): Promise<PricingRule[]> {
+  try {
+    const supabase = await createClient();
+    const { data, error } = await supabase
+      .from("pricing_rules")
+      .select("*")
+      .order("service_type", { ascending: true })
+      .order("category", { ascending: true });
+
+    if (error) {
+      console.error("Error fetching pricing rules:", error);
+      return [];
+    }
+    return data || [];
+  } catch (error) {
+    console.error("Exception fetching pricing rules:", error);
+    return [];
+  }
+}
+
+/**
+ * Update a pricing rule
+ */
+export async function updatePricingRule(id: string, value: number) {
+  try {
+    const supabase = await createClient();
+    const { error } = await supabase
+      .from("pricing_rules")
+      .update({ value, updated_at: new Date().toISOString() })
+      .eq("id", id);
+
+    if (error) {
+      return { success: false, error: error.message };
+    }
+    return { success: true };
+  } catch (error) {
+    return { success: false, error: "Update failed" };
   }
 }

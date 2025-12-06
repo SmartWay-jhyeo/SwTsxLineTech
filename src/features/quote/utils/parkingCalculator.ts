@@ -1,3 +1,5 @@
+import { type PricingRule } from "../actions";
+
 /**
  * 주차장 면적 기반 자동 계산 유틸리티
  *
@@ -110,7 +112,7 @@ export function getParkingSummary(result: ParkingCalculationResult): string {
 // 가격 계산 관련
 // ==========================================
 
-// 구간별 정액 가격 (전체 대수 기준)
+// 구간별 정액 가격 (전체 대수 기준) - Fallback constants
 const PRICES = {
   tiers: [
     { max: 20, price: 800000 },    // 1~20대: 80만원
@@ -124,6 +126,7 @@ export type PriceCalculationInput = {
   regularSpots: number;
   disabledSpots: number;
   evChargingSpots: number;
+  pricingRules?: PricingRule[]; // 동적 가격 규칙
 };
 
 export type PriceCalculationResult = {
@@ -135,6 +138,15 @@ export type PriceCalculationResult = {
 };
 
 /**
+ * 가격 규칙에서 값을 찾는 헬퍼
+ */
+function getPrice(rules: PricingRule[] | undefined, category: string, key: string, fallback: number): number {
+  if (!rules) return fallback;
+  const rule = rules.find(r => r.service_type === 'lane' && r.category === category && r.key === key);
+  return rule ? Number(rule.value) : fallback;
+}
+
+/**
  * 예상 견적 금액 계산
  * @param input 주차칸 개수 데이터
  * @returns 가격 계산 결과
@@ -142,6 +154,15 @@ export type PriceCalculationResult = {
 export function calculateEstimatedPrice(input: PriceCalculationInput): PriceCalculationResult {
   const regularSpots = input.regularSpots;
   const specialSpots = input.disabledSpots + input.evChargingSpots;
+  const rules = input.pricingRules;
+
+  // 동적 가격 로드
+  const prices = {
+    tier_20: getPrice(rules, 'tier', 'tier_20', PRICES.tiers[0].price),
+    tier_100: getPrice(rules, 'tier', 'tier_100', PRICES.tiers[1].price),
+    tier_200: getPrice(rules, 'tier', 'tier_200', PRICES.tiers[2].price),
+    special_spot: getPrice(rules, 'option', 'special_spot', PRICES.specialSpot),
+  };
 
   // 일반 대수 200대 초과: 협의 필요
   if (regularSpots > 200) {
@@ -168,17 +189,14 @@ export function calculateEstimatedPrice(input: PriceCalculationInput): PriceCalc
   // 구간별 정액 (일반 대수만 기준, 장애인/전기차는 별도 추가금)
   let basePrice = 0;
   if (regularSpots > 0) {
-    basePrice = PRICES.tiers[PRICES.tiers.length - 1].price; // 기본값: 가장 큰 구간
-    for (const tier of PRICES.tiers) {
-      if (regularSpots <= tier.max) {
-        basePrice = tier.price;
-        break;
-      }
-    }
+    if (regularSpots <= 20) basePrice = prices.tier_20;
+    else if (regularSpots <= 100) basePrice = prices.tier_100;
+    else if (regularSpots <= 200) basePrice = prices.tier_200;
+    else basePrice = prices.tier_200; // Should be covered by >200 check but just in case
   }
 
   // 특수구역 추가금 (장애인/전기차는 별도)
-  const specialPrice = specialSpots * PRICES.specialSpot;
+  const specialPrice = specialSpots * prices.special_spot;
   const total = basePrice + specialPrice;
 
   return {
@@ -202,7 +220,7 @@ function formatPriceToMan(price: number): string {
 }
 
 /**
- * 가격 상수 조회 (외부 참조용)
+ * 가격 상수 조회 (외부 참조용 - 레거시 호환)
  */
 export const PRICE_INFO = {
   tiers: PRICES.tiers,

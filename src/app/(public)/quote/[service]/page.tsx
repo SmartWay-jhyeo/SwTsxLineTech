@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { QuoteForm } from "@/features/quote/components/QuoteForm";
+import { getPricingRules } from "@/features/quote/actions";
 
 type ServiceType = "lane" | "epoxy" | "paint";
 
@@ -26,6 +27,9 @@ export default async function Page({ params }: QuotePageProps) {
   const { service } = await params;
   const serviceName = serviceNames[service] || "서비스";
   const serviceDescription = serviceDescriptions[service] || "견적을 받아보세요";
+  
+  // Fetch dynamic pricing rules
+  const pricingRules = await getPricingRules();
 
   // 유효한 서비스 타입인지 확인
   const validServices: ServiceType[] = ["lane", "epoxy", "paint"];
@@ -56,7 +60,7 @@ export default async function Page({ params }: QuotePageProps) {
 
         {/* Quote Form */}
         <div className="max-w-4xl mx-auto">
-          <QuoteForm serviceType={serviceType} />
+          <QuoteForm serviceType={serviceType} pricingRules={pricingRules} />
         </div>
       </div>
     </div>

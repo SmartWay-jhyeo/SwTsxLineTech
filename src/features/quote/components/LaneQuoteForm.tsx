@@ -4,7 +4,7 @@ import { useState, useMemo, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowRight, Building2, Trees, Loader2, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { submitQuote, type LaneQuoteInput } from "../actions";
+import { submitQuote, type LaneQuoteInput, type PricingRule } from "../actions";
 import { ParkingAreaMap, type ParkingAreaMapRef } from "./ParkingAreaMap";
 import { ParkingOptions } from "./ParkingOptions";
 import { EstimatedPrice } from "./EstimatedPrice";
@@ -15,9 +15,10 @@ type WorkType = "new" | "repaint";
 
 type LaneQuoteFormProps = {
   className?: string;
+  pricingRules?: PricingRule[];
 };
 
-export function LaneQuoteForm({ className }: LaneQuoteFormProps) {
+export function LaneQuoteForm({ className, pricingRules }: LaneQuoteFormProps) {
   const router = useRouter();
   const mapRef = useRef<ParkingAreaMapRef>(null);
 
@@ -72,10 +73,10 @@ export function LaneQuoteForm({ className }: LaneQuoteFormProps) {
   // 예상 견적 계산 (신규 도색일 때만)
   const estimatedPrice = useMemo(() => {
     if (workType === "new") {
-      return calculateEstimatedPrice(manualParkingData);
+      return calculateEstimatedPrice({ ...manualParkingData, pricingRules });
     }
     return null;
-  }, [workType, manualParkingData]);
+  }, [workType, manualParkingData, pricingRules]);
 
   // 전체 초기화 (지도 초기화 버튼과 연동)
   const handleFullReset = () => {

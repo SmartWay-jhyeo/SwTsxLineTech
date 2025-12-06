@@ -9,12 +9,14 @@ import { ColorPicker } from "./ColorPicker";
 import { ContactForm } from "./ContactForm";
 import { LaneQuoteForm } from "./LaneQuoteForm";
 import { EpoxyQuoteForm } from "./EpoxyQuoteForm";
+import type { PricingRule } from "../actions";
 
 type ServiceType = "lane" | "epoxy" | "paint";
 type FinishType = "glossy" | "matte" | "satin";
 
 type QuoteFormProps = {
   serviceType: ServiceType;
+  pricingRules?: PricingRule[];
 };
 
 // 서비스별 재료 옵션
@@ -64,7 +66,7 @@ const serviceNames: Record<ServiceType, string> = {
   paint: "내/외부 도장",
 };
 
-export function QuoteForm({ serviceType }: QuoteFormProps) {
+export function QuoteForm({ serviceType, pricingRules }: QuoteFormProps) {
   const [selectedMaterial, setSelectedMaterial] = useState<string | null>(null);
   const [selectedFinish, setSelectedFinish] = useState<FinishType | null>(null);
   const [selectedColor, setSelectedColor] = useState<string | null>(null);
@@ -81,12 +83,12 @@ export function QuoteForm({ serviceType }: QuoteFormProps) {
 
   // 차선/주차선은 전용 폼 사용
   if (serviceType === "lane") {
-    return <LaneQuoteForm />;
+    return <LaneQuoteForm pricingRules={pricingRules} />;
   }
 
   // 에폭시/바닥 시공은 전용 폼 사용
   if (serviceType === "epoxy") {
-    return <EpoxyQuoteForm />;
+    return <EpoxyQuoteForm pricingRules={pricingRules} />;
   }
 
   return (

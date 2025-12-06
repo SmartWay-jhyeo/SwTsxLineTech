@@ -8,7 +8,7 @@ import {
   SELF_LEVELING_PRICE,
   COLOR_MIXING_FEE,
   MIN_SERVICE_FEE,
-  getBasePriceByArea,
+  getBasePriceByArea as getBasePriceByAreaDefault,
   FLOOR_QUALITY,
   CRACK_CONDITION,
   ANTI_SLIP,
@@ -18,6 +18,7 @@ import {
   type FloorQualityId,
   type CrackConditionId,
 } from "../data/floorMaterials";
+import type { PricingRule } from "../actions";
 
 // 견적 계산 입력 타입
 export type EpoxyQuoteInput = {
@@ -30,6 +31,7 @@ export type EpoxyQuoteInput = {
   includeSurfaceProtection: boolean;  // 표면 보호막 (신규)
   includeSelfLeveling: boolean;
   needsColorMixingFee: boolean;
+  pricingRules?: PricingRule[];       // 동적 가격 규칙 (신규)
 };
 
 // 가격 항목별 내역
@@ -49,6 +51,15 @@ export type PriceBreakdown = {
 };
 
 /**
+ * 가격 규칙에서 값을 찾는 헬퍼
+ */
+function getPrice(rules: PricingRule[] | undefined, category: string, key: string, fallback: number): number {
+  if (!rules) return fallback;
+  const rule = rules.find(r => r.service_type === 'epoxy' && r.category === category && r.key === key);
+  return rule ? Number(rule.value) : fallback;
+}
+
+/**
  * 에폭시 견적 가격 계산 (신규 면적별 가격 체계)
  */
 export function calculateEpoxyPrice(input: EpoxyQuoteInput): PriceBreakdown {
@@ -61,44 +72,62 @@ export function calculateEpoxyPrice(input: EpoxyQuoteInput): PriceBreakdown {
     includeAntiSlip,
     includeSurfaceProtection,
     includeSelfLeveling,
-    needsColorMixingFee
+    needsColorMixingFee,
+    pricingRules
   } = input;
+
+  // 동적 가격 로드 (fallback은 기존 상수)
+  const prices = {
+    area_under_100: getPrice(pricingRules, 'area_base', 'area_under_100', 65000),
+    area_101_299: getPrice(pricingRules, 'area_base', 'area_101_299', 45000),
+    area_300_499: getPrice(pricingRules, 'area_base', 'area_300_499', 40000),
+    area_over_500: getPrice(pricingRules, 'area_base', 'area_over_500', 35000),
+    
+    quality_poor: getPrice(pricingRules, 'option', 'quality_poor', FLOOR_QUALITY.poor.price),
+    crack_severe: getPrice(pricingRules, 'option', 'crack_severe', CRACK_CONDITION.severe.price),
+    
+    anti_slip: getPrice(pricingRules, 'option', 'anti_slip', ANTI_SLIP.price),
+    surface_protection: getPrice(pricingRules, 'option', 'surface_protection', SURFACE_PROTECTION.price),
+    
+    self_leveling: getPrice(pricingRules, 'option', 'self_leveling', SELF_LEVELING_PRICE),
+    color_mixing: getPrice(pricingRules, 'option', 'color_mixing', COLOR_MIXING_FEE),
+    min_fee: getPrice(pricingRules, 'option', 'min_fee', MIN_SERVICE_FEE),
+  };
 
   // 1. 기본 단가 결정 (면적별 차등 가격 적용)
   let basePricePerM2: number;
   if (materialId === "solid_epoxy" && floorCondition) {
-    // 레거시: 칼라 에폭시는 바닥 상태에 따라 단가 결정
+    // 레거시: 칼라 에폭시는 바닥 상태에 따라 단가 결정 (DB 반영 안됨, 레거시 유지)
     basePricePerM2 = FLOOR_CONDITION_PRICES[floorCondition];
   } else {
-    // 신규: 면적별 차등 가격 (500㎡+ → 35,000 ... 100㎡- → 65,000)
-    basePricePerM2 = getBasePriceByArea(area);
+    // 신규: 면적별 차등 가격 (동적 가격 적용)
+    if (area >= 500) basePricePerM2 = prices.area_over_500;
+    else if (area >= 300) basePricePerM2 = prices.area_300_499;
+    else if (area >= 101) basePricePerM2 = prices.area_101_299;
+    else basePricePerM2 = prices.area_under_100;
   }
 
   // 2. 기본 시공비
   const basePrice = basePricePerM2 * area;
 
   // 3. 바닥 상태 추가 비용 (신규)
-  const floorQualityPrice = floorQuality && FLOOR_QUALITY[floorQuality]
-    ? FLOOR_QUALITY[floorQuality].price * area
-    : 0;
+  const floorQualityPrice = floorQuality === 'poor' ? prices.quality_poor * area : 0;
 
   // 4. 균열 보수 추가 비용 (신규)
-  const crackRepairPrice = crackCondition && CRACK_CONDITION[crackCondition]
-    ? CRACK_CONDITION[crackCondition].price * area
-    : 0;
+  const crackRepairPrice = crackCondition === 'severe' ? prices.crack_severe * area : 0;
 
   // 5. 미끄럼 방지 처리 (신규)
-  const antiSlipPrice = includeAntiSlip ? ANTI_SLIP.price * area : 0;
+  const antiSlipPrice = includeAntiSlip ? prices.anti_slip * area : 0;
 
   // 6. 표면 보호막 (신규)
-  const surfaceProtectionPrice = includeSurfaceProtection ? SURFACE_PROTECTION.price * area : 0;
+  const surfaceProtectionPrice = includeSurfaceProtection ? prices.surface_protection * area : 0;
 
   // 7. 셀프레벨링
-  const selfLevelingPricePerM2 = includeSelfLeveling ? SELF_LEVELING_PRICE : 0;
+  const selfLevelingPricePerM2 = includeSelfLeveling ? prices.self_leveling : 0;
   const selfLevelingPrice = selfLevelingPricePerM2 * area;
 
   // 8. 조색비 (고정 금액)
-  const colorMixingFee = needsColorMixingFee ? COLOR_MIXING_FEE : 0;
+  const colorMixingFee = needsColorMixingFee ? prices.color_mixing : 0;
 
   // 9. 소계
   const subtotal =
@@ -111,8 +140,8 @@ export function calculateEpoxyPrice(input: EpoxyQuoteInput): PriceBreakdown {
     colorMixingFee;
 
   // 10. 최소 출장비 적용
-  const isMinFeeApplied = subtotal < MIN_SERVICE_FEE && subtotal > 0;
-  const total = subtotal > 0 ? Math.max(subtotal, MIN_SERVICE_FEE) : 0;
+  const isMinFeeApplied = subtotal < prices.min_fee && subtotal > 0;
+  const total = subtotal > 0 ? Math.max(subtotal, prices.min_fee) : 0;
 
   return {
     basePricePerM2,

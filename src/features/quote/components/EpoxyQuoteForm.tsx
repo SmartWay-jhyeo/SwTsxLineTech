@@ -5,7 +5,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { ArrowRight, Check, ChevronLeft, ChevronRight, AlertCircle, ChevronUp, ChevronDown, Calculator, Loader2, Upload, X } from "lucide-react";
 import imageCompression from "browser-image-compression";
-import { submitQuote, uploadQuotePhotos, type EpoxyQuoteInput } from "../actions";
+import { submitQuote, uploadQuotePhotos, type EpoxyQuoteInput, type PricingRule } from "../actions";
 import { cn } from "@/lib/utils";
 import {
   FLOOR_MATERIALS,
@@ -37,7 +37,11 @@ import {
   type PriceBreakdown,
 } from "../utils/epoxyPriceCalculator";
 
-export function EpoxyQuoteForm() {
+type EpoxyQuoteFormProps = {
+  pricingRules?: PricingRule[];
+};
+
+export function EpoxyQuoteForm({ pricingRules }: EpoxyQuoteFormProps) {
   const router = useRouter();
 
   // 선택 상태
@@ -142,8 +146,9 @@ export function EpoxyQuoteForm() {
       includeSurfaceProtection: coatingType === "surface_protection", // 신규 (라디오 버튼)
       includeSelfLeveling,
       needsColorMixingFee,
+      pricingRules, // 동적 가격 규칙 전달
     });
-  }, [selectedMaterial, area, floorCondition, floorQuality, crackCondition, coatingType, includeSelfLeveling, needsColorMixingFee]);
+  }, [selectedMaterial, area, floorCondition, floorQuality, crackCondition, coatingType, includeSelfLeveling, needsColorMixingFee, pricingRules]);
 
   // 현재 마감재 정보
   const currentMaterial = useMemo(() => {
