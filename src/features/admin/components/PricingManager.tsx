@@ -112,7 +112,7 @@ export function PricingManager({ initialRules }: PricingManagerProps) {
                               type="number"
                               value={editValue}
                               onChange={(e) => setEditValue(e.target.value)}
-                              className="flex-1 h-9 px-2 text-sm border rounded focus:ring-2 focus:ring-primary focus:outline-none"
+                              className="flex-1 h-9 px-2 text-sm border rounded focus:ring-2 focus:ring-primary focus:outline-none bg-white text-gray-900"
                               autoFocus
                             />
                             <button
