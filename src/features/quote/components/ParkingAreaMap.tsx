@@ -122,6 +122,21 @@ export const ParkingAreaMap = forwardRef<ParkingAreaMapRef, ParkingAreaMapProps>
   const addPoint = (latLng: kakao.maps.LatLng) => {
     if (!mapRef.current || !isDrawingRef.current) return;
 
+    // 첫 번째 점 클릭 시 주소가 없으면 역지오코딩으로 자동 입력
+    if (pointsRef.current.length === 0 && !searchAddress) {
+      const geocoder = new window.kakao.maps.services.Geocoder();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (geocoder as any).coord2Address(latLng.getLng(), latLng.getLat(), (result: any, status: any) => {
+        if (status === window.kakao.maps.services.Status.OK && result[0]) {
+          const address = result[0].road_address?.address_name || result[0].address?.address_name;
+          if (address) {
+            setSearchAddress(address);
+            onAddressChange(address);
+          }
+        }
+      });
+    }
+
     // 마커 추가
     const marker = new window.kakao.maps.Marker({
       position: latLng,
@@ -318,20 +333,14 @@ export const ParkingAreaMap = forwardRef<ParkingAreaMapRef, ParkingAreaMapProps>
       <div className="flex items-center justify-between">
         <div className="flex gap-2">
           {pointCount > 0 && (
-            <>
-              <div className="flex items-center gap-2 px-3 py-2 bg-green-500/20 border border-green-500 rounded-lg text-green-400 text-sm">
-                <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-                {pointCount}점 선택됨
-              </div>
-              <button
-                type="button"
-                onClick={handleReset}
-                className="flex items-center gap-2 px-3 py-2 bg-white/10 rounded-lg text-white/70 text-sm hover:bg-white/20 transition-colors"
-              >
-                <RotateCcw size={16} />
-                초기화
-              </button>
-            </>
+            <button
+              type="button"
+              onClick={handleReset}
+              className="flex items-center gap-2 px-3 py-2 bg-white/10 rounded-lg text-white/70 text-sm hover:bg-white/20 transition-colors"
+            >
+              <RotateCcw size={16} />
+              초기화
+            </button>
           )}
         </div>
 

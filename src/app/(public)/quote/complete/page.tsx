@@ -44,7 +44,7 @@ export default function QuoteCompletePage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="max-w-lg mx-auto px-4 py-12">
+      <div className="max-w-lg mx-auto px-4 pt-24 pb-12">
         {/* 완료 메시지 */}
         <div className="text-center mb-8">
           <h1 className="text-white text-2xl font-bold mb-2">
