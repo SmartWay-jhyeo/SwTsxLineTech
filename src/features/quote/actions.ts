@@ -175,3 +175,102 @@ export async function updateQuoteStatus(id: string, status: QuoteStatus) {
     };
   }
 }
+
+/**
+ * 사진을 Supabase Storage에 업로드하고 공개 URL 반환
+ */
+export async function uploadQuotePhotos(formData: FormData): Promise<{
+  success: boolean;
+  urls?: string[];
+  error?: string
+}> {
+  try {
+    const supabase = await createClient();
+    const files = formData.getAll("photos") as File[];
+
+    if (files.length === 0) {
+      return { success: true, urls: [] };
+    }
+
+    // Storage 버킷 존재 확인 및 자동 생성
+    const { data: buckets } = await supabase.storage.listBuckets();
+    const quotesBucketExists = buckets?.some(b => b.id === "quotes");
+
+    if (!quotesBucketExists) {
+      await supabase.storage.createBucket("quotes", { public: true });
+    }
+
+    const uploadedUrls: string[] = [];
+
+    for (const file of files) {
+      const fileExt = file.name.split(".").pop();
+      const fileName = `${crypto.randomUUID()}.${fileExt}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from("quotes")
+        .upload(fileName, file, {
+          contentType: file.type,
+          upsert: false
+        });
+
+      if (uploadError) {
+        console.error("Upload error:", uploadError);
+        continue;
+      }
+
+      const { data: { publicUrl } } = supabase.storage
+        .from("quotes")
+        .getPublicUrl(fileName);
+
+      uploadedUrls.push(publicUrl);
+    }
+
+    return { success: true, urls: uploadedUrls };
+  } catch (err) {
+    console.error("Photo upload exception:", err);
+    return {
+      success: false,
+      error: err instanceof Error ? err.message : "사진 업로드 실패"
+    };
+  }
+}
+
+/**
+ * 견적 삭제 (사진 포함)
+ */
+export async function deleteQuote(id: string, photoUrls?: string[]) {
+  try {
+    const supabase = await createClient();
+
+    // 1. Storage에서 사진 삭제
+    if (photoUrls && photoUrls.length > 0) {
+      const filePaths = photoUrls
+        .map(url => {
+          const parts = url.split('/');
+          return parts[parts.length - 1];
+        })
+        .filter(Boolean);
+
+      if (filePaths.length > 0) {
+        await supabase.storage.from("quotes").remove(filePaths);
+      }
+    }
+
+    // 2. DB에서 견적 삭제
+    const { error } = await supabase
+      .from("quotes")
+      .delete()
+      .eq("id", id);
+
+    if (error) {
+      return { success: false, error: error.message };
+    }
+
+    return { success: true };
+  } catch (err) {
+    return {
+      success: false,
+      error: err instanceof Error ? err.message : "삭제 실패"
+    };
+  }
+}

@@ -2,7 +2,8 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { updateQuoteStatus, type QuoteStatus } from "@/features/quote/actions";
+import { updateQuoteStatus, deleteQuote, type QuoteStatus } from "@/features/quote/actions";
+import { Trash2 } from "lucide-react";
 
 type Quote = {
   id: string;
@@ -72,6 +73,7 @@ export function QuotesTable({ quotes }: { quotes: Quote[] }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [updatingId, setUpdatingId] = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const handleStatusChange = async (id: string, newStatus: QuoteStatus) => {
     setUpdatingId(id);
@@ -85,6 +87,24 @@ export function QuotesTable({ quotes }: { quotes: Quote[] }) {
       alert("상태 변경 실패: " + result.error);
     }
     setUpdatingId(null);
+  };
+
+  const handleDelete = async (id: string, photoUrls?: string[]) => {
+    if (!confirm("정말 이 견적을 삭제하시겠습니까?\n삭제된 데이터는 복구할 수 없습니다.")) {
+      return;
+    }
+
+    setDeletingId(id);
+    const result = await deleteQuote(id, photoUrls);
+
+    if (result.success) {
+      startTransition(() => {
+        router.refresh();
+      });
+    } else {
+      alert("삭제 실패: " + result.error);
+    }
+    setDeletingId(null);
   };
 
   return (
@@ -112,6 +132,9 @@ export function QuotesTable({ quotes }: { quotes: Quote[] }) {
             </th>
             <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
               상태
+            </th>
+            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+              작업
             </th>
           </tr>
         </thead>
@@ -233,6 +256,19 @@ export function QuotesTable({ quotes }: { quotes: Quote[] }) {
                     )
                   )}
                 </select>
+              </td>
+              <td className="px-4 py-3 text-sm">
+                <button
+                  onClick={() => handleDelete(
+                    quote.id,
+                    (quote.options as EpoxyOptions)?.photoUrls
+                  )}
+                  disabled={deletingId === quote.id || isPending}
+                  className="p-2 text-red-600 hover:text-red-800 hover:bg-red-50 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  title="삭제"
+                >
+                  <Trash2 size={16} />
+                </button>
               </td>
             </tr>
           ))}

@@ -2,9 +2,10 @@
 
 import { useState, useMemo, useRef } from "react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { ArrowRight, Check, ChevronLeft, ChevronRight, AlertCircle, ChevronUp, ChevronDown, Calculator, Loader2, Upload, X } from "lucide-react";
 import imageCompression from "browser-image-compression";
-import { submitQuote, type EpoxyQuoteInput } from "../actions";
+import { submitQuote, uploadQuotePhotos, type EpoxyQuoteInput } from "../actions";
 import { cn } from "@/lib/utils";
 import {
   FLOOR_MATERIALS,
@@ -37,6 +38,8 @@ import {
 } from "../utils/epoxyPriceCalculator";
 
 export function EpoxyQuoteForm() {
+  const router = useRouter();
+
   // 선택 상태
   const [selectedMaterial, setSelectedMaterial] = useState<MaterialId | null>(null);
   const [selectedFinish, setSelectedFinish] = useState<FinishId | null>(null);
@@ -263,57 +266,80 @@ export function EpoxyQuoteForm() {
       ? `${optionsSummary}\n\n[추가요청]\n${contactData.notes}`
       : optionsSummary;
 
-    // 서버 액션에 맞는 데이터 형식으로 변환
-    const quoteData: EpoxyQuoteInput = {
-      service_type: "epoxy",
-      area: parseFloat(area),
-      surface_condition: condition?.name || "normal",
-      contact_name: contactData.name,
-      contact_phone: contactData.phone,
-      notes: fullNotes,
-      options: {
-        material: material?.name || "",
-        finish: finish?.name,
-        color: color?.name,
-        colorMixingFee: needsColorMixingFee,
-        selfLeveling: includeSelfLeveling,
-        floorCondition: condition?.name,
-        applicationMethod: condition?.method,
-        location: contactData.location,
-        // 신규 옵션
-        floorQuality: FLOOR_QUALITY[floorQuality].name,
-        crackCondition: CRACK_CONDITION[crackCondition].name,
-        antiSlip: coatingType === "anti_slip",
-        surfaceProtection: coatingType === "surface_protection",
-        // 사진 URL은 나중에 Supabase Storage 연동 시 추가
-        // photoUrls: uploadedPhotoUrls,
-      },
-      base_cost: priceBreakdown?.basePrice || 0,
-      option_cost: (priceBreakdown?.selfLevelingPrice || 0) + (priceBreakdown?.colorMixingFee || 0),
-      surcharge: 0,
-      total_cost: priceBreakdown?.total || 0,
-      is_minimum_applied: priceBreakdown?.isMinFeeApplied || false,
-    };
-
     setIsSubmitting(true);
+    let uploadedPhotoUrls: string[] = [];
+
     try {
+      // 1. 사진 업로드 (서버 액션)
+      if (photos.length > 0) {
+        const formData = new FormData();
+        photos.forEach(photo => formData.append("photos", photo));
+
+        const uploadResult = await uploadQuotePhotos(formData);
+
+        if (uploadResult.success && uploadResult.urls) {
+          uploadedPhotoUrls = uploadResult.urls;
+        } else {
+          console.warn("사진 업로드 실패:", uploadResult.error);
+          // 사진 업로드 실패해도 견적은 계속 진행
+        }
+      }
+
+      // 2. 견적 데이터 준비
+      const quoteData: EpoxyQuoteInput = {
+        service_type: "epoxy",
+        area: parseFloat(area),
+        surface_condition: condition?.name || "normal",
+        contact_name: contactData.name,
+        contact_phone: contactData.phone,
+        notes: fullNotes,
+        options: {
+          material: material?.name || "",
+          finish: finish?.name,
+          color: color?.name,
+          colorMixingFee: needsColorMixingFee,
+          selfLeveling: includeSelfLeveling,
+          floorCondition: condition?.name,
+          applicationMethod: condition?.method,
+          location: contactData.location,
+          // 신규 옵션
+          floorQuality: FLOOR_QUALITY[floorQuality].name,
+          crackCondition: CRACK_CONDITION[crackCondition].name,
+          antiSlip: coatingType === "anti_slip",
+          surfaceProtection: coatingType === "surface_protection",
+          photoUrls: uploadedPhotoUrls, // 주석 제거!
+        },
+        base_cost: priceBreakdown?.basePrice || 0,
+        option_cost: (priceBreakdown?.selfLevelingPrice || 0) + (priceBreakdown?.colorMixingFee || 0),
+        surcharge: 0,
+        total_cost: priceBreakdown?.total || 0,
+        is_minimum_applied: priceBreakdown?.isMinFeeApplied || false,
+      };
+
+      // 3. 견적 제출
       const result = await submitQuote(quoteData);
 
       if (result.success) {
-        alert("견적 요청이 접수되었습니다!\n담당자가 빠른 시일 내에 연락드리겠습니다.");
-        // 폼 초기화
-        setSelectedMaterial(null);
-        setSelectedFinish(null);
-        setSelectedColor(null);
-        setIncludeSelfLeveling(false);
-        setFloorCondition(null);
-        setArea("");
-        setContactData({ location: "", name: "", phone: "", notes: "" });
+        // 4. 완료 페이지 데이터 저장 및 리다이렉트
+        const completeData = {
+          serviceType: "epoxy",
+          material: material?.name || "",
+          finish: finish?.name || "",
+          color: color?.name || "",
+          area: parseFloat(area),
+          estimatedPrice: formatPrice(priceBreakdown?.total || 0),
+          contactName: contactData.name,
+          contactPhone: contactData.phone,
+          location: contactData.location,
+        };
+        sessionStorage.setItem("quoteCompleteData", JSON.stringify(completeData));
+        router.push("/quote/complete");
       } else {
-        alert("견적 요청 중 오류가 발생했습니다.\n" + (result.error || "다시 시도해주세요."));
+        alert("견적 요청 중 오류가 발생했습니다.\n" + (result.error || ""));
       }
-    } catch {
-      alert("견적 요청 중 오류가 발생했습니다.\n다시 시도해주세요.");
+    } catch (error) {
+      console.error("Submit error:", error);
+      alert("견적 요청 중 오류가 발생했습니다.");
     } finally {
       setIsSubmitting(false);
     }

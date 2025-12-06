@@ -6,12 +6,20 @@ import { Home, FileText, Phone } from "lucide-react";
 import Link from "next/link";
 
 type QuoteCompleteData = {
-  serviceType: string;
-  workType: string;
-  locationType: string;
-  regularSpots: number;
-  disabledSpots: number;
-  evChargingSpots: number;
+  serviceType: "lane" | "epoxy";
+  // Lane 전용
+  workType?: string;
+  locationType?: string;
+  regularSpots?: number;
+  disabledSpots?: number;
+  evChargingSpots?: number;
+  // Epoxy 전용
+  material?: string;
+  finish?: string;
+  color?: string;
+  area?: number;
+  location?: string;
+  // 공통
   estimatedPrice: string;
   contactName: string;
   contactPhone: string;
@@ -64,24 +72,68 @@ export default function QuoteCompletePage() {
           <div className="space-y-3">
             <div className="flex justify-between">
               <span className="text-white/60">서비스</span>
-              <span className="text-white">차선/주차장 도색</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-white/60">작업 유형</span>
-              <span className="text-white">{workTypeLabel}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-white/60">주차장 위치</span>
-              <span className="text-white">{locationLabel}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-white/60">주차 대수</span>
               <span className="text-white">
-                일반 {data.regularSpots}대
-                {data.disabledSpots > 0 && `, 장애인 ${data.disabledSpots}대`}
-                {data.evChargingSpots > 0 && `, 전기차 ${data.evChargingSpots}대`}
+                {data.serviceType === "lane" ? "차선/주차장 도색" : "에폭시 바닥재"}
               </span>
             </div>
+
+            {data.serviceType === "lane" ? (
+              // Lane 정보
+              <>
+                <div className="flex justify-between">
+                  <span className="text-white/60">작업 유형</span>
+                  <span className="text-white">{workTypeLabel}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-white/60">주차장 위치</span>
+                  <span className="text-white">{locationLabel}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-white/60">주차 대수</span>
+                  <span className="text-white">
+                    일반 {data.regularSpots}대
+                    {data.disabledSpots && data.disabledSpots > 0 && `, 장애인 ${data.disabledSpots}대`}
+                    {data.evChargingSpots && data.evChargingSpots > 0 && `, 전기차 ${data.evChargingSpots}대`}
+                  </span>
+                </div>
+              </>
+            ) : (
+              // Epoxy 정보
+              <>
+                {data.material && (
+                  <div className="flex justify-between">
+                    <span className="text-white/60">마감재</span>
+                    <span className="text-white">{data.material}</span>
+                  </div>
+                )}
+                {data.finish && (
+                  <div className="flex justify-between">
+                    <span className="text-white/60">광택</span>
+                    <span className="text-white">{data.finish}</span>
+                  </div>
+                )}
+                {data.color && (
+                  <div className="flex justify-between">
+                    <span className="text-white/60">색상</span>
+                    <span className="text-white">{data.color}</span>
+                  </div>
+                )}
+                {data.area && (
+                  <div className="flex justify-between">
+                    <span className="text-white/60">시공 면적</span>
+                    <span className="text-white">{data.area} m²</span>
+                  </div>
+                )}
+                {data.location && (
+                  <div className="flex justify-between">
+                    <span className="text-white/60">시공 장소</span>
+                    <span className="text-white">{data.location}</span>
+                  </div>
+                )}
+              </>
+            )}
+
+            {/* 공통: 예상 견적 */}
             {data.estimatedPrice && data.estimatedPrice !== "0원" && (
               <div className="flex justify-between pt-3 border-t border-white/10">
                 <span className="text-white/60">예상 견적</span>
@@ -117,7 +169,7 @@ export default function QuoteCompletePage() {
             홈으로
           </Link>
           <Link
-            href="/quote/lane"
+            href={data.serviceType === "lane" ? "/quote/lane" : "/quote/epoxy"}
             className="flex-1 flex items-center justify-center gap-2 h-12 bg-primary rounded-full text-white font-medium hover:opacity-90 transition-opacity"
           >
             <FileText size={18} />
