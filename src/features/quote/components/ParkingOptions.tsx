@@ -180,9 +180,9 @@ export function ParkingOptions({ mode, autoResult, manualData, onManualChange, c
         </div>
 
         <p className="text-white/40 text-xs">
-          * 면적 기준 자동 계산 (1대당 약 30㎡)
+          * 장애인·전기차 대수는 일반적인 법령 기준으로 자동 계산됩니다
           <br />
-          * 장애인 주차 3%, 전기차 충전 5% 적용
+          * 지자체별로 다를 수 있습니다
         </p>
       </div>
     );
@@ -231,9 +231,9 @@ export function ParkingOptions({ mode, autoResult, manualData, onManualChange, c
         </div>
 
         <p className="text-white/40 text-xs">
-          * 자동 계산 기준 (1대당 약 30㎡)
+          * 장애인·전기차 대수는 일반적인 법령 기준으로 자동 계산됩니다
           <br />
-          * +/- 버튼으로 수정 가능합니다
+          * 지자체별로 다를 수 있으니 +/- 버튼으로 수정 가능합니다
         </p>
       </div>
     );

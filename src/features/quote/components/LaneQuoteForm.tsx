@@ -119,10 +119,10 @@ export function LaneQuoteForm({ className }: LaneQuoteFormProps) {
         address,
         parkingData,
       },
-      base_cost: estimatedPrice?.subtotal || 0,
-      option_cost: 0,
+      base_cost: estimatedPrice?.basePrice || 0,
+      option_cost: estimatedPrice?.specialPrice || 0,
       total_cost: estimatedPrice?.total || 0,
-      is_minimum_applied: estimatedPrice?.isMinimumApplied || false,
+      needs_consultation: estimatedPrice?.needsConsultation || false,
     };
 
     setIsSubmitting(true);
@@ -261,7 +261,7 @@ export function LaneQuoteForm({ className }: LaneQuoteFormProps) {
           )}
 
           {/* 예상 견적 (신규 도색일 때만) */}
-          {workType === "new" && estimatedPrice && estimatedPrice.total > 0 && (
+          {workType === "new" && estimatedPrice && (estimatedPrice.total > 0 || estimatedPrice.needsConsultation) && (
             <EstimatedPrice priceResult={estimatedPrice} />
           )}
 

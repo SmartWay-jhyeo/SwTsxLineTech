@@ -110,12 +110,14 @@ export function getParkingSummary(result: ParkingCalculationResult): string {
 // 가격 계산 관련
 // ==========================================
 
-// 주차칸별 단가 (원)
+// 구간별 정액 가격 (전체 대수 기준)
 const PRICES = {
-  regular: 30000,       // 일반 주차칸
-  disabled: 50000,      // 장애인 주차칸
-  ev: 50000,            // 전기차 충전칸
-  minMobilization: 300000, // 최소 출장비
+  tiers: [
+    { max: 20, price: 800000 },    // 1~20대: 80만원
+    { max: 100, price: 1250000 },  // 21~100대: 125만원
+    { max: 200, price: 2400000 },  // 101~200대: 240만원
+  ],
+  specialSpot: 250000,  // 장애인/전기차 면당 25만원 추가
 } as const;
 
 export type PriceCalculationInput = {
@@ -125,10 +127,11 @@ export type PriceCalculationInput = {
 };
 
 export type PriceCalculationResult = {
-  subtotal: number;
+  basePrice: number;       // 구간 정액
+  specialPrice: number;    // 특수구역 추가금
   total: number;
-  isMinimumApplied: boolean;
-  formatted: string; // "약 XXX만원"
+  needsConsultation: boolean;  // 200대 초과 시 true
+  formatted: string; // "약 XXX만원" 또는 "별도 협의"
 };
 
 /**
@@ -137,18 +140,49 @@ export type PriceCalculationResult = {
  * @returns 가격 계산 결과
  */
 export function calculateEstimatedPrice(input: PriceCalculationInput): PriceCalculationResult {
-  const subtotal =
-    input.regularSpots * PRICES.regular +
-    input.disabledSpots * PRICES.disabled +
-    input.evChargingSpots * PRICES.ev;
+  const totalSpots = input.regularSpots + input.disabledSpots + input.evChargingSpots;
+  const specialSpots = input.disabledSpots + input.evChargingSpots;
 
-  const isMinimumApplied = subtotal < PRICES.minMobilization && subtotal > 0;
-  const total = subtotal > 0 ? Math.max(subtotal, PRICES.minMobilization) : 0;
+  // 200대 초과: 협의 필요
+  if (totalSpots > 200) {
+    return {
+      basePrice: 0,
+      specialPrice: 0,
+      total: 0,
+      needsConsultation: true,
+      formatted: "별도 협의",
+    };
+  }
+
+  // 0대: 빈 결과
+  if (totalSpots === 0) {
+    return {
+      basePrice: 0,
+      specialPrice: 0,
+      total: 0,
+      needsConsultation: false,
+      formatted: "0원",
+    };
+  }
+
+  // 구간별 정액 (전체 대수 기준)
+  let basePrice = PRICES.tiers[PRICES.tiers.length - 1].price; // 기본값: 가장 큰 구간
+  for (const tier of PRICES.tiers) {
+    if (totalSpots <= tier.max) {
+      basePrice = tier.price;
+      break;
+    }
+  }
+
+  // 특수구역 추가금
+  const specialPrice = specialSpots * PRICES.specialSpot;
+  const total = basePrice + specialPrice;
 
   return {
-    subtotal,
+    basePrice,
+    specialPrice,
     total,
-    isMinimumApplied,
+    needsConsultation: false,
     formatted: formatPriceToMan(total),
   };
 }
@@ -168,8 +202,6 @@ function formatPriceToMan(price: number): string {
  * 가격 상수 조회 (외부 참조용)
  */
 export const PRICE_INFO = {
-  regular: PRICES.regular,
-  disabled: PRICES.disabled,
-  ev: PRICES.ev,
-  minMobilization: PRICES.minMobilization,
+  tiers: PRICES.tiers,
+  specialSpot: PRICES.specialSpot,
 } as const;

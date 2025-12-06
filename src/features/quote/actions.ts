@@ -25,10 +25,10 @@ export type LaneQuoteInput = BaseQuoteData & {
       evChargingSpots: number;
     };
   };
-  base_cost: number;
-  option_cost: number;
+  base_cost: number;  // 구간 정액
+  option_cost: number;  // 특수구역 추가금
   total_cost: number;
-  is_minimum_applied: boolean;
+  needs_consultation: boolean;  // 200대 초과 시 true
 };
 
 // 에폭시 견적 타입
@@ -74,7 +74,9 @@ export async function submitQuote(data: QuoteInput): Promise<SubmitQuoteResult> 
       surface_condition: data.service_type === "epoxy"
         ? (data as EpoxyQuoteInput).surface_condition
         : "normal",
-      options: data.options,
+      options: data.service_type === "lane"
+        ? { ...data.options, needs_consultation: (data as LaneQuoteInput).needs_consultation }
+        : data.options,
       contact_name: data.contact_name,
       contact_phone: data.contact_phone,
       contact_email: data.contact_email || null,
@@ -85,7 +87,9 @@ export async function submitQuote(data: QuoteInput): Promise<SubmitQuoteResult> 
         ? (data as EpoxyQuoteInput).surcharge
         : 0,
       total_cost: data.total_cost,
-      is_minimum_applied: data.is_minimum_applied,
+      is_minimum_applied: data.service_type === "epoxy"
+        ? (data as EpoxyQuoteInput).is_minimum_applied
+        : false,
     };
 
     const { data: result, error } = await supabase
