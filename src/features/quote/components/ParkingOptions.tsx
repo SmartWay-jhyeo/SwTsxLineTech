@@ -180,9 +180,9 @@ export function ParkingOptions({ mode, autoResult, manualData, onManualChange, c
         </div>
 
         <p className="text-white/40 text-xs">
-          * 장애인·전기차 대수는 일반적인 법령 기준으로 자동 계산됩니다
+          * 면적 기반 자동 계산은 대략적인 수치입니다
           <br />
-          * 지자체별로 다를 수 있습니다
+          * 정확한 대수를 아시면 전화 상담 시 알려주세요
         </p>
       </div>
     );
@@ -231,9 +231,9 @@ export function ParkingOptions({ mode, autoResult, manualData, onManualChange, c
         </div>
 
         <p className="text-white/40 text-xs">
-          * 장애인·전기차 대수는 일반적인 법령 기준으로 자동 계산됩니다
+          * 면적 기반 자동 계산은 대략적인 수치입니다
           <br />
-          * 지자체별로 다를 수 있으니 +/- 버튼으로 수정 가능합니다
+          * 정확한 대수를 아시면 직접 수정하시거나, 전화 상담 시 알려주세요
         </p>
       </div>
     );

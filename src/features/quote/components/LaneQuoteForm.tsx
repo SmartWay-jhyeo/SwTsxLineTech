@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { ArrowRight, Sparkles, PaintBucket, Building2, Trees, Loader2, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { submitQuote, type LaneQuoteInput } from "../actions";
@@ -17,6 +18,8 @@ type LaneQuoteFormProps = {
 };
 
 export function LaneQuoteForm({ className }: LaneQuoteFormProps) {
+  const router = useRouter();
+
   // 작업 유형 (신규/덧칠)
   const [workType, setWorkType] = useState<WorkType>("new");
 
@@ -135,12 +138,20 @@ export function LaneQuoteForm({ className }: LaneQuoteFormProps) {
       const result = await submitQuote(quoteData);
 
       if (result.success) {
-        alert("견적 요청이 접수되었습니다!\n담당자가 빠른 시일 내에 연락드리겠습니다.");
-        // 폼 초기화
-        handleFullReset();
-        setContactName("");
-        setContactPhone("");
-        setNotes("");
+        // 완료 페이지에 전달할 데이터 저장
+        const completeData = {
+          serviceType: "lane",
+          workType,
+          locationType,
+          regularSpots: parkingData.regularSpots,
+          disabledSpots: parkingData.disabledSpots,
+          evChargingSpots: parkingData.evChargingSpots,
+          estimatedPrice: estimatedPrice?.formatted || "",
+          contactName,
+          contactPhone,
+        };
+        sessionStorage.setItem("quoteCompleteData", JSON.stringify(completeData));
+        router.push("/quote/complete");
       } else {
         alert("견적 요청 중 오류가 발생했습니다.\n" + (result.error || "다시 시도해주세요."));
       }

@@ -140,11 +140,11 @@ export type PriceCalculationResult = {
  * @returns 가격 계산 결과
  */
 export function calculateEstimatedPrice(input: PriceCalculationInput): PriceCalculationResult {
-  const totalSpots = input.regularSpots + input.disabledSpots + input.evChargingSpots;
+  const regularSpots = input.regularSpots;
   const specialSpots = input.disabledSpots + input.evChargingSpots;
 
-  // 200대 초과: 협의 필요
-  if (totalSpots > 200) {
+  // 일반 대수 200대 초과: 협의 필요
+  if (regularSpots > 200) {
     return {
       basePrice: 0,
       specialPrice: 0,
@@ -155,7 +155,7 @@ export function calculateEstimatedPrice(input: PriceCalculationInput): PriceCalc
   }
 
   // 0대: 빈 결과
-  if (totalSpots === 0) {
+  if (regularSpots === 0 && specialSpots === 0) {
     return {
       basePrice: 0,
       specialPrice: 0,
@@ -165,16 +165,19 @@ export function calculateEstimatedPrice(input: PriceCalculationInput): PriceCalc
     };
   }
 
-  // 구간별 정액 (전체 대수 기준)
-  let basePrice = PRICES.tiers[PRICES.tiers.length - 1].price; // 기본값: 가장 큰 구간
-  for (const tier of PRICES.tiers) {
-    if (totalSpots <= tier.max) {
-      basePrice = tier.price;
-      break;
+  // 구간별 정액 (일반 대수만 기준, 장애인/전기차는 별도 추가금)
+  let basePrice = 0;
+  if (regularSpots > 0) {
+    basePrice = PRICES.tiers[PRICES.tiers.length - 1].price; // 기본값: 가장 큰 구간
+    for (const tier of PRICES.tiers) {
+      if (regularSpots <= tier.max) {
+        basePrice = tier.price;
+        break;
+      }
     }
   }
 
-  // 특수구역 추가금
+  // 특수구역 추가금 (장애인/전기차는 별도)
   const specialPrice = specialSpots * PRICES.specialSpot;
   const total = basePrice + specialPrice;
 
