@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import Link from "next/link";
 import { X, Home, FileText, MessageCircle, Star, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -35,6 +36,13 @@ const services = [
 ];
 
 export function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
+  const [mounted, setMounted] = useState(false);
+
+  // Client-side mounting check
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   // ESC 키로 닫기
   useEffect(() => {
     const handleEsc = (e: KeyboardEvent) => {
@@ -50,7 +58,9 @@ export function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
     };
   }, [isOpen, onClose]);
 
-  return (
+  if (!mounted) return null;
+
+  return createPortal(
     <>
       {/* Backdrop */}
       <div
@@ -139,6 +149,7 @@ export function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
           </Link>
         </nav>
       </div>
-    </>
+    </>,
+    document.body
   );
 }

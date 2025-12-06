@@ -1,41 +1,114 @@
 "use client";
 
-import { useState } from "react";
-import { MessageCircle, X, Send, Loader2 } from "lucide-react";
+import { useState, useRef, useEffect } from "react";
+import { MessageCircle, X, Send } from "lucide-react";
 import { cn } from "@/lib/utils";
+
+type Message = {
+  type: "bot" | "user";
+  content: string;
+};
 
 export function Chatbot() {
   const [isOpen, setIsOpen] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [name, setName] = useState("");
-  const [phone, setPhone] = useState("");
-  const [message, setMessage] = useState("");
+  const [step, setStep] = useState(0);
+  const [messages, setMessages] = useState<Message[]>([
+    { type: "bot", content: "안녕하세요! 라인테크입니다. 무엇을 도와드릴까요?" },
+  ]);
+  const [inputValue, setInputValue] = useState("");
+  const [formData, setFormData] = useState({
+    name: "",
+    phone: "",
+    message: "",
+  });
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
-    if (!name || !phone || !message) {
-      alert("모든 항목을 입력해주세요.");
-      return;
+  // Auto-scroll to bottom when messages change
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
+
+  const handleSend = async () => {
+    if (!inputValue.trim()) return;
+
+    // Add user message
+    const userMessage: Message = { type: "user", content: inputValue };
+    setMessages((prev) => [...prev, userMessage]);
+
+    // Process based on current step
+    let nextStep = step + 1;
+    let botResponse = "";
+
+    switch (step) {
+      case 0: // Collecting name
+        setFormData((prev) => ({ ...prev, name: inputValue }));
+        botResponse = "감사합니다. 연락처를 입력해주세요.";
+        break;
+
+      case 1: // Collecting phone
+        setFormData((prev) => ({ ...prev, phone: inputValue }));
+        botResponse = "문의 내용을 자세히 적어주세요.";
+        break;
+
+      case 2: // Collecting message
+        setFormData((prev) => ({ ...prev, message: inputValue }));
+        botResponse = "문의가 접수되었습니다. 빠른 시일 내에 연락드리겠습니다!";
+
+        // Submit to server (TODO: Implement Supabase)
+        try {
+          // Simulate API call
+          await new Promise((resolve) => setTimeout(resolve, 500));
+          console.log("Inquiry submitted:", {
+            name: formData.name,
+            phone: formData.phone,
+            message: inputValue,
+          });
+        } catch (error) {
+          console.error("Failed to submit inquiry:", error);
+        }
+        break;
+
+      case 3: // Complete
+        // Reset conversation
+        setTimeout(() => {
+          setMessages([
+            { type: "bot", content: "안녕하세요! 라인테크입니다. 무엇을 도와드릴까요?" },
+          ]);
+          setStep(0);
+          setFormData({ name: "", phone: "", message: "" });
+        }, 3000);
+        nextStep = 3; // Stay at step 3
+        break;
     }
 
-    setIsSubmitting(true);
+    // Add bot response
+    if (botResponse) {
+      setTimeout(() => {
+        setMessages((prev) => [...prev, { type: "bot", content: botResponse }]);
+      }, 500);
+    }
 
-    try {
-      // TODO: Implement Supabase save logic
-      // For now, just simulate a delay
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+    setStep(nextStep);
+    setInputValue("");
+  };
 
-      alert("문의가 접수되었습니다. 빠른 시일 내에 연락드리겠습니다.");
-      setName("");
-      setPhone("");
-      setMessage("");
-      setIsOpen(false);
-    } catch (error) {
-      console.error("Failed to submit inquiry:", error);
-      alert("문의 전송에 실패했습니다. 다시 시도해주세요.");
-    } finally {
-      setIsSubmitting(false);
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      handleSend();
+    }
+  };
+
+  const handleOpen = () => {
+    setIsOpen(true);
+    // Reset if previously completed
+    if (step === 3) {
+      setMessages([
+        { type: "bot", content: "안녕하세요! 라인테크입니다. 무엇을 도와드릴까요?" },
+      ]);
+      setStep(0);
+      setFormData({ name: "", phone: "", message: "" });
     }
   };
 
@@ -43,7 +116,7 @@ export function Chatbot() {
     <>
       {/* Floating Button */}
       <button
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={() => (isOpen ? setIsOpen(false) : handleOpen())}
         className={cn(
           "fixed bottom-6 right-6 w-14 h-14 rounded-full flex items-center justify-center shadow-lg transition-all duration-200 z-40",
           isOpen
@@ -68,70 +141,54 @@ export function Chatbot() {
           <p className="text-white/60 text-sm mt-1">무엇을 도와드릴까요?</p>
         </div>
 
-        {/* Form */}
-        <form onSubmit={handleSubmit} className="flex-1 flex flex-col p-4 space-y-4 overflow-y-auto">
-          <div>
-            <label htmlFor="chatbot-name" className="block text-white/70 text-sm mb-2">
-              이름 *
-            </label>
-            <input
-              id="chatbot-name"
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              className="w-full bg-white/5 border border-white/20 rounded-lg px-4 py-2.5 text-white text-sm placeholder:text-white/40 focus:outline-none focus:border-primary"
-              placeholder="이름을 입력하세요"
-              required
-            />
-          </div>
+        {/* Messages */}
+        <div className="flex-1 overflow-y-auto p-4 space-y-4">
+          {messages.map((msg, index) => (
+            <div
+              key={index}
+              className={cn(
+                "flex",
+                msg.type === "user" ? "justify-end" : "justify-start"
+              )}
+            >
+              <div
+                className={cn(
+                  "max-w-[80%] rounded-lg px-4 py-2",
+                  msg.type === "user"
+                    ? "bg-primary text-white"
+                    : "bg-white/10 text-white"
+                )}
+              >
+                <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
+              </div>
+            </div>
+          ))}
+          <div ref={messagesEndRef} />
+        </div>
 
-          <div>
-            <label htmlFor="chatbot-phone" className="block text-white/70 text-sm mb-2">
-              연락처 *
-            </label>
-            <input
-              id="chatbot-phone"
-              type="tel"
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-              className="w-full bg-white/5 border border-white/20 rounded-lg px-4 py-2.5 text-white text-sm placeholder:text-white/40 focus:outline-none focus:border-primary"
-              placeholder="010-1234-5678"
-              required
-            />
+        {/* Input */}
+        {step < 3 && (
+          <div className="p-4 border-t border-white/10">
+            <div className="flex gap-2">
+              <input
+                type={step === 1 ? "tel" : "text"}
+                value={inputValue}
+                onChange={(e) => setInputValue(e.target.value)}
+                onKeyPress={handleKeyPress}
+                placeholder="메시지를 입력하세요..."
+                className="flex-1 bg-white/5 border border-white/20 rounded-lg px-4 py-2.5 text-white text-sm placeholder:text-white/40 focus:outline-none focus:border-primary"
+              />
+              <button
+                onClick={handleSend}
+                disabled={!inputValue.trim()}
+                className="p-2.5 bg-primary hover:bg-primary/90 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                aria-label="전송"
+              >
+                <Send size={20} />
+              </button>
+            </div>
           </div>
-
-          <div className="flex-1">
-            <label htmlFor="chatbot-message" className="block text-white/70 text-sm mb-2">
-              문의 내용 *
-            </label>
-            <textarea
-              id="chatbot-message"
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-              className="w-full h-32 bg-white/5 border border-white/20 rounded-lg px-4 py-2.5 text-white text-sm placeholder:text-white/40 focus:outline-none focus:border-primary resize-none"
-              placeholder="문의 내용을 입력하세요"
-              required
-            />
-          </div>
-
-          <button
-            type="submit"
-            disabled={isSubmitting}
-            className="w-full flex items-center justify-center gap-2 bg-primary hover:bg-primary/90 text-white rounded-lg py-3 font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {isSubmitting ? (
-              <>
-                <Loader2 size={18} className="animate-spin" />
-                <span>전송 중...</span>
-              </>
-            ) : (
-              <>
-                <Send size={18} />
-                <span>전송하기</span>
-              </>
-            )}
-          </button>
-        </form>
+        )}
       </div>
     </>
   );
