@@ -9,6 +9,7 @@ import { ColorPicker } from "./ColorPicker";
 import { ContactForm } from "./ContactForm";
 import { LaneQuoteForm } from "./LaneQuoteForm";
 import { EpoxyQuoteForm } from "./EpoxyQuoteForm";
+import { PaintQuoteForm } from "./PaintQuoteForm";
 import type { PricingRule } from "../actions";
 
 type ServiceType = "lane" | "epoxy" | "paint";
@@ -89,6 +90,11 @@ export function QuoteForm({ serviceType, pricingRules }: QuoteFormProps) {
   // 에폭시/바닥 시공은 전용 폼 사용
   if (serviceType === "epoxy") {
     return <EpoxyQuoteForm pricingRules={pricingRules} />;
+  }
+
+  // 도장 시공은 전용 폼 사용
+  if (serviceType === "paint") {
+    return <PaintQuoteForm pricingRules={pricingRules} />;
   }
 
   return (
