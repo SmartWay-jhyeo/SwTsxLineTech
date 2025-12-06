@@ -41,8 +41,8 @@ export function PaintQuoteForm({ pricingRules }: PaintQuoteFormProps) {
   // Image Source
   const currentImage = useMemo(() => {
     return paintType === "interior" 
-      ? "/images/in_out_paint/inpaint.jpg"
-      : "/images/in_out_paint/outpaint.jpg";
+      ? "/images/in_out_paint/inpaint2.jpg"
+      : "/images/in_out_paint/outpaint2.jpg";
   }, [paintType]);
 
   // Calculate Price
