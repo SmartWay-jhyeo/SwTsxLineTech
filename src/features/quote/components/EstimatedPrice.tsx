@@ -3,14 +3,32 @@
 import { Calculator, AlertCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { PriceCalculationResult } from "../utils/parkingCalculator";
+import type { PricingRule } from "@/features/quote/actions";
 
 type EstimatedPriceProps = {
   priceResult: PriceCalculationResult | null;
   className?: string;
+  pricingRules?: PricingRule[];
 };
 
-export function EstimatedPrice({ priceResult, className }: EstimatedPriceProps) {
+function formatToMan(value: number) {
+  return `${Math.round(value / 10000).toLocaleString()}만원`;
+}
+
+export function EstimatedPrice({ priceResult, className, pricingRules }: EstimatedPriceProps) {
   if (!priceResult || (priceResult.total === 0 && !priceResult.needsConsultation)) return null;
+
+  // 가격 추출
+  const getPrice = (key: string, fallback: number) => {
+    if (!pricingRules) return fallback;
+    const rule = pricingRules.find(r => r.service_type === 'lane' && (r.category === 'tier' || r.category === 'option') && r.key === key);
+    return rule ? Number(rule.value) : fallback;
+  };
+
+  const tier20 = getPrice('tier_20', 800000);
+  const tier100 = getPrice('tier_100', 1250000);
+  const tier200 = getPrice('tier_200', 2400000);
+  const specialSpot = getPrice('special_spot', 250000);
 
   return (
     <div
@@ -36,9 +54,9 @@ export function EstimatedPrice({ priceResult, className }: EstimatedPriceProps) 
 
       <div className="mt-3 pt-3 border-t border-white/10">
         <p className="text-white/40 text-xs text-center">
-          * 1~20대 80만원 / 21~100대 125만원 / 101~200대 240만원
+          * 1~20대 {formatToMan(tier20)} / 21~100대 {formatToMan(tier100)} / 101~200대 {formatToMan(tier200)}
           <br />
-          * 장애인·전기차 구역 추가 시 면당 25만원 추가
+          * 장애인·전기차 구역 추가 시 면당 {formatToMan(specialSpot)} 추가
           <br />
           * 실제 견적은 현장 상황에 따라 달라질 수 있습니다
         </p>

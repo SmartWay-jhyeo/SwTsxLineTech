@@ -150,11 +150,27 @@ export function EpoxyQuoteForm({ pricingRules }: EpoxyQuoteFormProps) {
     });
   }, [selectedMaterial, area, floorCondition, floorQuality, crackCondition, coatingType, includeSelfLeveling, needsColorMixingFee, pricingRules]);
 
+  // 가격 조회 헬퍼
+  const getPrice = (category: string, key: string, fallback: number) => {
+    if (!pricingRules) return fallback;
+    const rule = pricingRules.find(r => r.service_type === 'epoxy' && r.category === category && r.key === key);
+    return rule ? Number(rule.value) : fallback;
+  };
+
   // 현재 마감재 정보
   const currentMaterial = useMemo(() => {
     if (!selectedMaterial) return null;
     return FLOOR_MATERIALS.find(m => m.id === selectedMaterial);
   }, [selectedMaterial]);
+  
+  // 동적 가격 데이터
+  const prices = {
+      quality_poor: getPrice('option', 'quality_poor', FLOOR_QUALITY.poor.price),
+      crack_severe: getPrice('option', 'crack_severe', CRACK_CONDITION.severe.price),
+      anti_slip: getPrice('option', 'anti_slip', ANTI_SLIP.price),
+      surface_protection: getPrice('option', 'surface_protection', SURFACE_PROTECTION.price),
+      self_leveling: getPrice('option', 'self_leveling', 30000),
+  };
 
   // 갤러리 스크롤
   const scrollGallery = (direction: "left" | "right") => {
@@ -432,7 +448,7 @@ export function EpoxyQuoteForm({ pricingRules }: EpoxyQuoteFormProps) {
                 <span className="text-orange-400">+ 바닥 보수 작업</span>
               </div>
               <div className="flex justify-between items-center text-xs text-white/50 mt-0.5">
-                <span>15,000원/m² × {areaNum}</span>
+                <span>{formatPrice(prices.quality_poor)}/m² × {areaNum}</span>
                 <span className="text-orange-400">{formatPrice(priceBreakdown.floorQualityPrice)}</span>
               </div>
             </div>
@@ -445,7 +461,7 @@ export function EpoxyQuoteForm({ pricingRules }: EpoxyQuoteFormProps) {
                 <span className="text-red-400">+ 균열 보수</span>
               </div>
               <div className="flex justify-between items-center text-xs text-white/50 mt-0.5">
-                <span>30,000원/m² × {areaNum}</span>
+                <span>{formatPrice(prices.crack_severe)}/m² × {areaNum}</span>
                 <span className="text-red-400">{formatPrice(priceBreakdown.crackRepairPrice)}</span>
               </div>
             </div>
@@ -458,7 +474,7 @@ export function EpoxyQuoteForm({ pricingRules }: EpoxyQuoteFormProps) {
                 <span className="text-blue-400">+ {ANTI_SLIP.name}</span>
               </div>
               <div className="flex justify-between items-center text-xs text-white/50 mt-0.5">
-                <span>{formatPrice(ANTI_SLIP.price)}/m² × {areaNum}</span>
+                <span>{formatPrice(prices.anti_slip)}/m² × {areaNum}</span>
                 <span className="text-blue-400">{formatPrice(priceBreakdown.antiSlipPrice)}</span>
               </div>
             </div>
@@ -471,7 +487,7 @@ export function EpoxyQuoteForm({ pricingRules }: EpoxyQuoteFormProps) {
                 <span className="text-purple-400">+ {SURFACE_PROTECTION.name}</span>
               </div>
               <div className="flex justify-between items-center text-xs text-white/50 mt-0.5">
-                <span>{formatPrice(SURFACE_PROTECTION.price)}/m² × {areaNum}</span>
+                <span>{formatPrice(prices.surface_protection)}/m² × {areaNum}</span>
                 <span className="text-purple-400">{formatPrice(priceBreakdown.surfaceProtectionPrice)}</span>
               </div>
             </div>
@@ -892,7 +908,7 @@ export function EpoxyQuoteForm({ pricingRules }: EpoxyQuoteFormProps) {
               <div className="flex-1">
                 <span className="text-white text-sm font-medium">{ANTI_SLIP.name}</span>
                 <p className="text-white/60 text-xs mt-1">{ANTI_SLIP.description}</p>
-                <p className="text-blue-400 text-xs mt-1">+{formatPrice(ANTI_SLIP.price)}/m²</p>
+                <p className="text-blue-400 text-xs mt-1">+{formatPrice(prices.anti_slip)}/m²</p>
               </div>
             </label>
 
@@ -913,7 +929,7 @@ export function EpoxyQuoteForm({ pricingRules }: EpoxyQuoteFormProps) {
               <div className="flex-1">
                 <span className="text-white text-sm font-medium">{SURFACE_PROTECTION.name}</span>
                 <p className="text-white/60 text-xs mt-1">{SURFACE_PROTECTION.description}</p>
-                <p className="text-purple-400 text-xs mt-1">+{formatPrice(SURFACE_PROTECTION.price)}/m²</p>
+                <p className="text-purple-400 text-xs mt-1">+{formatPrice(prices.surface_protection)}/m²</p>
               </div>
             </label>
           </div>
@@ -939,7 +955,9 @@ export function EpoxyQuoteForm({ pricingRules }: EpoxyQuoteFormProps) {
               <div className="space-y-2">
                 <label className="text-white text-sm font-medium block">현재 바닥 상태</label>
                 <div className="space-y-2">
-                  {(Object.entries(FLOOR_QUALITY) as [FloorQualityId, typeof FLOOR_QUALITY[FloorQualityId]][]).map(([id, quality]) => (
+                  {(Object.entries(FLOOR_QUALITY) as [FloorQualityId, typeof FLOOR_QUALITY[FloorQualityId]][]).map(([id, quality]) => {
+                    const price = id === 'poor' ? prices.quality_poor : quality.price;
+                    return (
                     <label
                       key={id}
                       className={cn(
@@ -959,12 +977,13 @@ export function EpoxyQuoteForm({ pricingRules }: EpoxyQuoteFormProps) {
                       <div className="flex-1">
                         <span className="text-white font-medium">{quality.name}</span>
                         <p className="text-white/60 text-xs mt-0.5">{quality.description}</p>
-                        {quality.price > 0 && (
-                          <p className="text-orange-400 text-xs mt-1">+{formatPrice(quality.price)}/m²</p>
+                        {price > 0 && (
+                          <p className="text-orange-400 text-xs mt-1">+{formatPrice(price)}/m²</p>
                         )}
                       </div>
                     </label>
-                  ))}
+                  );
+                  })}
                 </div>
               </div>
 
@@ -972,7 +991,9 @@ export function EpoxyQuoteForm({ pricingRules }: EpoxyQuoteFormProps) {
               <div className="space-y-2">
                 <label className="text-white text-sm font-medium block">바닥 균열 정도</label>
                 <div className="space-y-2">
-                  {(Object.entries(CRACK_CONDITION) as [CrackConditionId, typeof CRACK_CONDITION[CrackConditionId]][]).map(([id, condition]) => (
+                  {(Object.entries(CRACK_CONDITION) as [CrackConditionId, typeof CRACK_CONDITION[CrackConditionId]][]).map(([id, condition]) => {
+                    const price = id === 'severe' ? prices.crack_severe : condition.price;
+                    return (
                     <label
                       key={id}
                       className={cn(
@@ -992,12 +1013,13 @@ export function EpoxyQuoteForm({ pricingRules }: EpoxyQuoteFormProps) {
                       <div className="flex-1">
                         <span className="text-white font-medium">{condition.name}</span>
                         <p className="text-white/60 text-xs mt-0.5">{condition.description}</p>
-                        {condition.price > 0 && (
-                          <p className="text-red-400 text-xs mt-1">+{formatPrice(condition.price)}/m²</p>
+                        {price > 0 && (
+                          <p className="text-red-400 text-xs mt-1">+{formatPrice(price)}/m²</p>
                         )}
                       </div>
                     </label>
-                  ))}
+                  );
+                  })}
                 </div>
               </div>
             </div>

@@ -314,7 +314,7 @@ export function LaneQuoteForm({ className, pricingRules }: LaneQuoteFormProps) {
 
           {/* 예상 견적 (신규 도색일 때만) */}
           {workType === "new" && estimatedPrice && (estimatedPrice.total > 0 || estimatedPrice.needsConsultation) && (
-            <EstimatedPrice priceResult={estimatedPrice} />
+            <EstimatedPrice priceResult={estimatedPrice} pricingRules={pricingRules} />
           )}
 
           {/* 연락처 정보 */}
