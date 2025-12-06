@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import Link from "next/link";
-import { X, Home, FileText, MessageCircle, Star, ChevronRight } from "lucide-react";
+import { X, Home, FileText, MessageCircle, MessageSquare, ChevronRight, ChevronDown, ChevronUp } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 type MobileMenuProps = {
@@ -37,6 +37,7 @@ const services = [
 
 export function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
   const [mounted, setMounted] = useState(false);
+  const [isServicesOpen, setIsServicesOpen] = useState(false);
 
   // Client-side mounting check
   useEffect(() => {
@@ -102,30 +103,41 @@ export function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
             <span className="font-medium">홈</span>
           </Link>
 
-          {/* 서비스 */}
-          <div className="space-y-4">
-            <div className="flex items-center gap-2 text-white/70 text-sm font-medium">
-              <FileText size={18} />
-              <span>서비스</span>
-            </div>
-            {services.map((service) => (
-              <div key={service.name} className="pl-6 space-y-2">
-                <p className="text-white font-medium text-sm">{service.name}</p>
-                <div className="pl-4 space-y-2">
-                  {service.links.map((link) => (
-                    <Link
-                      key={link.href}
-                      href={link.href}
-                      onClick={onClose}
-                      className="flex items-center gap-2 text-white/60 hover:text-primary text-sm transition-colors group"
-                    >
-                      <ChevronRight size={14} className="group-hover:translate-x-1 transition-transform" />
-                      <span>{link.label}</span>
-                    </Link>
-                  ))}
-                </div>
+          {/* 서비스 - 토글 */}
+          <div>
+            <button
+              onClick={() => setIsServicesOpen(!isServicesOpen)}
+              className="flex items-center justify-between w-full text-white/70 hover:text-white text-sm font-medium transition-colors"
+            >
+              <div className="flex items-center gap-2">
+                <FileText size={18} />
+                <span>서비스</span>
               </div>
-            ))}
+              {isServicesOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+            </button>
+
+            {isServicesOpen && (
+              <div className="space-y-4 mt-4">
+                {services.map((service) => (
+                  <div key={service.name} className="pl-6 space-y-2">
+                    <p className="text-white font-medium text-sm">{service.name}</p>
+                    <div className="pl-4 space-y-2">
+                      {service.links.map((link) => (
+                        <Link
+                          key={link.href}
+                          href={link.href}
+                          onClick={onClose}
+                          className="flex items-center gap-2 text-white/60 hover:text-primary text-sm transition-colors group"
+                        >
+                          <ChevronRight size={14} className="group-hover:translate-x-1 transition-transform" />
+                          <span>{link.label}</span>
+                        </Link>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* 기타 문의하기 */}
@@ -144,7 +156,7 @@ export function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
             onClick={onClose}
             className="flex items-center gap-3 text-white hover:text-primary transition-colors"
           >
-            <Star size={20} />
+            <MessageSquare size={20} />
             <span className="font-medium">후기보기</span>
           </Link>
         </nav>

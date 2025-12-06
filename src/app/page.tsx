@@ -1,5 +1,7 @@
 import { ServicePanel } from "@/components/shared/ServicePanel";
 import { Header } from "@/components/shared/Header";
+import { Chatbot } from "@/components/shared/Chatbot";
+import { YouTubeButton } from "@/components/shared/YouTubeButton";
 
 const services = [
   {
@@ -40,6 +42,8 @@ export default function Page() {
           />
         ))}
       </div>
+      <Chatbot />
+      <YouTubeButton />
     </>
   );
 }
