@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useMemo, useEffect } from "react";
-import { ArrowRight, Sparkles, PaintBucket, Building2, Trees, Loader2 } from "lucide-react";
+import { ArrowRight, Sparkles, PaintBucket, Building2, Trees, Loader2, Check } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { submitQuote, type LaneQuoteInput } from "../actions";
 import { ParkingAreaMap } from "./ParkingAreaMap";
 import { ParkingOptions } from "./ParkingOptions";
@@ -40,6 +41,10 @@ export function LaneQuoteForm({ className }: LaneQuoteFormProps) {
 
   // 제출 상태
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // 단계별 진행 상태
+  const [step1Completed, setStep1Completed] = useState(false);
+  const [step2Completed, setStep2Completed] = useState(false);
 
   // 자동 계산 결과 (지상/지하에 따라 면적 계수 적용)
   const autoCalculation = useMemo(() => {
@@ -151,76 +156,116 @@ export function LaneQuoteForm({ className }: LaneQuoteFormProps) {
       {/* 투어 가이드 (첫 방문 시) */}
       <TourGuide />
 
-      {/* 옵션 선택 영역 */}
-      <div className="flex flex-col sm:flex-row gap-3 mb-6">
-        {/* 작업 유형 탭 */}
-        <div className="flex flex-1 bg-white/5 rounded-lg p-1">
-          <button
-            type="button"
-            onClick={() => setWorkType("new")}
-            className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-md text-sm font-medium transition-all ${
-              workType === "new"
-                ? "bg-primary text-white"
-                : "text-white/60 hover:text-white"
-            }`}
-          >
-            <Sparkles size={18} />
-            신규 도색
-          </button>
-          <button
-            type="button"
-            onClick={() => setWorkType("repaint")}
-            className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-md text-sm font-medium transition-all ${
-              workType === "repaint"
-                ? "bg-primary text-white"
-                : "text-white/60 hover:text-white"
-            }`}
-          >
-            <PaintBucket size={18} />
-            기존 덧칠
-          </button>
+      {/* STEP 1: 작업 유형 선택 */}
+      <div className="mb-6">
+        <div className="flex items-center gap-2 mb-4">
+          <span className={cn(
+            "w-7 h-7 rounded-full text-sm flex items-center justify-center font-bold transition-all",
+            step1Completed ? "bg-primary text-white" : "bg-white/20 text-white"
+          )}>
+            {step1Completed ? <Check size={16} /> : "1"}
+          </span>
+          <h3 className="text-white font-medium">작업 유형을 선택하세요</h3>
         </div>
-
-        {/* 주차장 위치 탭 */}
-        <div className="flex flex-1 bg-white/5 rounded-lg p-1">
+        <div className="grid grid-cols-2 gap-3">
           <button
             type="button"
-            onClick={() => setLocationType("ground")}
-            className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-md text-sm font-medium transition-all ${
-              locationType === "ground"
-                ? "bg-primary text-white"
-                : "text-white/60 hover:text-white"
-            }`}
+            onClick={() => { setWorkType("new"); setStep1Completed(true); }}
+            className={cn(
+              "flex flex-col items-center p-5 rounded-xl border-2 transition-all",
+              workType === "new" && step1Completed
+                ? "bg-primary/20 border-primary"
+                : "bg-white/5 border-white/10 hover:border-white/30"
+            )}
           >
-            <Trees size={18} />
-            지상
+            <Sparkles size={28} className={cn(
+              "mb-2",
+              workType === "new" && step1Completed ? "text-primary" : "text-white/70"
+            )} />
+            <span className="text-white font-medium">신규 도색</span>
+            <span className="text-white/50 text-xs mt-1">새로 라인을 칠합니다</span>
           </button>
           <button
             type="button"
-            onClick={() => setLocationType("underground")}
-            className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-md text-sm font-medium transition-all ${
-              locationType === "underground"
-                ? "bg-primary text-white"
-                : "text-white/60 hover:text-white"
-            }`}
+            onClick={() => { setWorkType("repaint"); setStep1Completed(true); }}
+            className={cn(
+              "flex flex-col items-center p-5 rounded-xl border-2 transition-all",
+              workType === "repaint" && step1Completed
+                ? "bg-primary/20 border-primary"
+                : "bg-white/5 border-white/10 hover:border-white/30"
+            )}
           >
-            <Building2 size={18} />
-            지하
+            <PaintBucket size={28} className={cn(
+              "mb-2",
+              workType === "repaint" && step1Completed ? "text-primary" : "text-white/70"
+            )} />
+            <span className="text-white font-medium">기존 덧칠</span>
+            <span className="text-white/50 text-xs mt-1">기존 라인 위에 덧칠합니다</span>
           </button>
         </div>
       </div>
 
-      {/* 단일 컬럼 레이아웃 */}
-      <div className="space-y-6">
-        {/* 지도 영역 (전체 가로 폭) */}
-        <ParkingAreaMap
-          onAreaChange={setArea}
-          onAddressChange={setAddress}
-          onReset={handleFullReset}
-        />
+      {/* STEP 2: 주차장 위치 선택 (Step 1 완료 후 표시) */}
+      {step1Completed && (
+        <div className="mb-6 animate-in fade-in slide-in-from-top-4 duration-300">
+          <div className="flex items-center gap-2 mb-4">
+            <span className={cn(
+              "w-7 h-7 rounded-full text-sm flex items-center justify-center font-bold transition-all",
+              step2Completed ? "bg-primary text-white" : "bg-white/20 text-white"
+            )}>
+              {step2Completed ? <Check size={16} /> : "2"}
+            </span>
+            <h3 className="text-white font-medium">주차장 위치를 선택하세요</h3>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <button
+              type="button"
+              onClick={() => { setLocationType("ground"); setStep2Completed(true); }}
+              className={cn(
+                "flex flex-col items-center p-5 rounded-xl border-2 transition-all",
+                locationType === "ground" && step2Completed
+                  ? "bg-primary/20 border-primary"
+                  : "bg-white/5 border-white/10 hover:border-white/30"
+              )}
+            >
+              <Trees size={28} className={cn(
+                "mb-2",
+                locationType === "ground" && step2Completed ? "text-primary" : "text-white/70"
+              )} />
+              <span className="text-white font-medium">지상</span>
+              <span className="text-white/50 text-xs mt-1">옥외 주차장</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => { setLocationType("underground"); setStep2Completed(true); }}
+              className={cn(
+                "flex flex-col items-center p-5 rounded-xl border-2 transition-all",
+                locationType === "underground" && step2Completed
+                  ? "bg-primary/20 border-primary"
+                  : "bg-white/5 border-white/10 hover:border-white/30"
+              )}
+            >
+              <Building2 size={28} className={cn(
+                "mb-2",
+                locationType === "underground" && step2Completed ? "text-primary" : "text-white/70"
+              )} />
+              <span className="text-white font-medium">지하</span>
+              <span className="text-white/50 text-xs mt-1">지하 주차장</span>
+            </button>
+          </div>
+        </div>
+      )}
 
-        {/* 하단: 옵션 영역 */}
-        <div className="space-y-6">
+      {/* 지도 및 나머지 폼 (Step 2 완료 후 표시) */}
+      {step2Completed && (
+        <div className="space-y-6 animate-in fade-in slide-in-from-top-4 duration-300">
+          {/* 지도 영역 */}
+          <ParkingAreaMap
+            onAreaChange={setArea}
+            onAddressChange={setAddress}
+            onReset={handleFullReset}
+          />
+
           {/* 측정 면적 표시 */}
           {area > 0 && (
             <div className="bg-white/5 rounded-lg p-4">
@@ -297,30 +342,30 @@ export function LaneQuoteForm({ className }: LaneQuoteFormProps) {
               className="w-full bg-transparent border border-white/20 rounded-lg px-4 py-2.5 text-white text-sm placeholder:text-white/40 focus:outline-none focus:border-primary resize-none"
             />
           </div>
-        </div>
-      </div>
 
-      {/* 제출 버튼 */}
-      <div className="mt-8">
-        <button
-          type="button"
-          onClick={handleSubmit}
-          disabled={isSubmitting}
-          className="w-full flex items-center justify-center gap-2 h-14 bg-primary rounded-full text-white font-medium hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          {isSubmitting ? (
-            <>
-              <Loader2 size={20} className="animate-spin" />
-              <span>요청 중...</span>
-            </>
-          ) : (
-            <>
-              <span>견적 요청하기</span>
-              <ArrowRight size={20} />
-            </>
-          )}
-        </button>
-      </div>
+          {/* 제출 버튼 */}
+          <div className="mt-2">
+            <button
+              type="button"
+              onClick={handleSubmit}
+              disabled={isSubmitting}
+              className="w-full flex items-center justify-center gap-2 h-14 bg-primary rounded-full text-white font-medium hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isSubmitting ? (
+                <>
+                  <Loader2 size={20} className="animate-spin" />
+                  <span>요청 중...</span>
+                </>
+              ) : (
+                <>
+                  <span>견적 요청하기</span>
+                  <ArrowRight size={20} />
+                </>
+              )}
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
