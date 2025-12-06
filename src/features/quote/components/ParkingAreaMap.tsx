@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, forwardRef, useImperativeHandle } from "react";
 import { Search, RotateCcw, MapPin, HelpCircle } from "lucide-react";
 import Image from "next/image";
 
@@ -10,7 +10,18 @@ type ParkingAreaMapProps = {
   onReset?: () => void;  // 부모 컴포넌트 초기화 콜백
 };
 
-export function ParkingAreaMap({ onAreaChange, onAddressChange, onReset }: ParkingAreaMapProps) {
+export type ParkingAreaMapRef = {
+  focusInput: () => void;
+};
+
+export const ParkingAreaMap = forwardRef<ParkingAreaMapRef, ParkingAreaMapProps>(function ParkingAreaMap({ onAreaChange, onAddressChange, onReset }, ref) {
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useImperativeHandle(ref, () => ({
+    focusInput: () => {
+      inputRef.current?.focus();
+    },
+  }));
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<kakao.maps.Map | null>(null);
   const polygonRef = useRef<kakao.maps.Polygon | null>(null);
@@ -229,6 +240,7 @@ export function ParkingAreaMap({ onAreaChange, onAddressChange, onReset }: Parki
       <div className="flex gap-2" data-tour="address-search">
         <div className="flex-1 relative">
           <input
+            ref={inputRef}
             type="text"
             value={searchAddress}
             onChange={(e) => setSearchAddress(e.target.value)}
@@ -340,4 +352,4 @@ export function ParkingAreaMap({ onAreaChange, onAddressChange, onReset }: Parki
       </p>
     </div>
   );
-}
+});

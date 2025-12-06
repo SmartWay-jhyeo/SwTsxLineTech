@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { CheckCircle, Home, FileText, Phone } from "lucide-react";
+import { Home, FileText, Phone } from "lucide-react";
 import Link from "next/link";
 
 type QuoteCompleteData = {
@@ -45,11 +45,8 @@ export default function QuoteCompletePage() {
   return (
     <div className="min-h-screen bg-background">
       <div className="max-w-lg mx-auto px-4 py-12">
-        {/* 완료 아이콘 */}
+        {/* 완료 메시지 */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-20 h-20 bg-primary/20 rounded-full mb-4">
-            <CheckCircle size={48} className="text-primary" />
-          </div>
           <h1 className="text-white text-2xl font-bold mb-2">
             견적 요청이 완료되었습니다!
           </h1>

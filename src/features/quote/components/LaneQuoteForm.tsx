@@ -1,11 +1,11 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowRight, Sparkles, PaintBucket, Building2, Trees, Loader2, Check } from "lucide-react";
+import { ArrowRight, Building2, Trees, Loader2, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { submitQuote, type LaneQuoteInput } from "../actions";
-import { ParkingAreaMap } from "./ParkingAreaMap";
+import { ParkingAreaMap, type ParkingAreaMapRef } from "./ParkingAreaMap";
 import { ParkingOptions } from "./ParkingOptions";
 import { EstimatedPrice } from "./EstimatedPrice";
 import { TourGuide } from "./TourGuide";
@@ -19,6 +19,7 @@ type LaneQuoteFormProps = {
 
 export function LaneQuoteForm({ className }: LaneQuoteFormProps) {
   const router = useRouter();
+  const mapRef = useRef<ParkingAreaMapRef>(null);
 
   // 작업 유형 (신규/덧칠)
   const [workType, setWorkType] = useState<WorkType>("new");
@@ -87,6 +88,7 @@ export function LaneQuoteForm({ className }: LaneQuoteFormProps) {
   const handleSubmit = async () => {
     if (!address) {
       alert("주소를 입력해주세요.");
+      mapRef.current?.focusInput();
       return;
     }
     if (!contactPhone) {
@@ -189,10 +191,6 @@ export function LaneQuoteForm({ className }: LaneQuoteFormProps) {
                 : "bg-white/5 border-white/10 hover:border-white/30"
             )}
           >
-            <Sparkles size={28} className={cn(
-              "mb-2",
-              workType === "new" && step1Completed ? "text-primary" : "text-white/70"
-            )} />
             <span className="text-white font-medium">신규 도색</span>
             <span className="text-white/50 text-xs mt-1">새로 라인을 칠합니다</span>
           </button>
@@ -206,10 +204,6 @@ export function LaneQuoteForm({ className }: LaneQuoteFormProps) {
                 : "bg-white/5 border-white/10 hover:border-white/30"
             )}
           >
-            <PaintBucket size={28} className={cn(
-              "mb-2",
-              workType === "repaint" && step1Completed ? "text-primary" : "text-white/70"
-            )} />
             <span className="text-white font-medium">기존 덧칠</span>
             <span className="text-white/50 text-xs mt-1">기존 라인 위에 덧칠합니다</span>
           </button>
@@ -272,6 +266,7 @@ export function LaneQuoteForm({ className }: LaneQuoteFormProps) {
         <div className="space-y-6 animate-in fade-in slide-in-from-top-4 duration-300">
           {/* 지도 영역 */}
           <ParkingAreaMap
+            ref={mapRef}
             onAreaChange={setArea}
             onAddressChange={setAddress}
             onReset={handleFullReset}
