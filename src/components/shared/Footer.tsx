@@ -1,4 +1,15 @@
+"use client";
+
+import { usePathname } from "next/navigation";
+
 export function Footer() {
+  const pathname = usePathname();
+
+  // 관리자 페이지에서는 Footer 숨김
+  if (pathname?.startsWith("/admin")) {
+    return null;
+  }
+
   return (
     <footer className="bg-background border-t border-white/10 py-12 px-4">
       <div className="max-w-4xl mx-auto text-center space-y-4">
