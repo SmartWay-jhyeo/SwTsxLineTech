@@ -39,7 +39,8 @@ create table if not exists public.quotes (
   option_cost numeric not null,
   surcharge numeric not null,
   total_cost numeric not null,
-  is_minimum_applied boolean default false
+  is_minimum_applied boolean default false,
+  status text default 'pending' not null
 );
 
 -- Portfolio Items Table
@@ -72,9 +73,11 @@ alter table public.portfolio_items enable row level security;
 create policy "Allow public read services" on public.services for select to anon using (true);
 create policy "Allow public read materials" on public.materials for select to anon using (true);
 
--- 2. Quotes (Public Insert, Admin Read)
+-- 2. Quotes (Public Insert, Admin Read/Update/Delete)
 create policy "Allow public insert quotes" on public.quotes for insert to anon with check (true);
--- Admin read policy will be added when auth is set up
+create policy "Allow authenticated read quotes" on public.quotes for select to authenticated using (true);
+create policy "Allow authenticated update quotes" on public.quotes for update to authenticated using (true);
+create policy "Allow authenticated delete quotes" on public.quotes for delete to authenticated using (true);
 
 -- 3. Portfolio Items (Public Read, Admin All)
 create policy "Allow public read portfolio" on public.portfolio_items for select to anon using (true);
@@ -100,3 +103,24 @@ create policy "Authenticated Delete"
 on storage.objects for delete
 to authenticated
 using ( bucket_id = 'portfolio' );
+
+-- Storage Bucket for Quote Photos
+insert into storage.buckets (id, name, public)
+values ('quotes', 'quotes', true)
+on conflict (id) do nothing;
+
+-- Storage Policies for Quotes Bucket
+create policy "Public Access quotes"
+on storage.objects for select
+to public
+using ( bucket_id = 'quotes' );
+
+create policy "Public Upload quotes"
+on storage.objects for insert
+to anon
+with check ( bucket_id = 'quotes' );
+
+create policy "Authenticated Delete quotes"
+on storage.objects for delete
+to authenticated
+using ( bucket_id = 'quotes' );
