@@ -1065,28 +1065,28 @@ export function EpoxyQuoteForm({ pricingRules }: EpoxyQuoteFormProps) {
               value={contactData.location}
               onChange={(e) => setContactData(prev => ({ ...prev, location: e.target.value }))}
               placeholder="시공 장소 (예: 서울시 강남구)"
-              className="w-full bg-transparent border border-white/20 rounded-lg px-4 py-2.5 text-white text-sm placeholder:text-white/40 focus:outline-none focus:border-primary"
+              className="w-full bg-white border border-white/20 rounded-lg px-4 py-2.5 text-gray-900 text-sm placeholder:text-gray-400 focus:outline-none focus:border-primary"
             />
             <input
               type="text"
               value={contactData.name}
               onChange={(e) => setContactData(prev => ({ ...prev, name: e.target.value }))}
               placeholder="담당자 이름"
-              className="w-full bg-transparent border border-white/20 rounded-lg px-4 py-2.5 text-white text-sm placeholder:text-white/40 focus:outline-none focus:border-primary"
+              className="w-full bg-white border border-white/20 rounded-lg px-4 py-2.5 text-gray-900 text-sm placeholder:text-gray-400 focus:outline-none focus:border-primary"
             />
             <input
               type="tel"
               value={contactData.phone}
               onChange={(e) => setContactData(prev => ({ ...prev, phone: e.target.value }))}
               placeholder="연락처 (필수) *"
-              className="w-full bg-transparent border border-white/20 rounded-lg px-4 py-2.5 text-white text-sm placeholder:text-white/40 focus:outline-none focus:border-primary"
+              className="w-full bg-white border border-white/20 rounded-lg px-4 py-2.5 text-gray-900 text-sm placeholder:text-gray-400 focus:outline-none focus:border-primary"
             />
             <textarea
               value={contactData.notes}
               onChange={(e) => setContactData(prev => ({ ...prev, notes: e.target.value }))}
               placeholder="추가 요청사항"
               rows={3}
-              className="w-full bg-transparent border border-white/20 rounded-lg px-4 py-2.5 text-white text-sm placeholder:text-white/40 focus:outline-none focus:border-primary resize-none"
+              className="w-full bg-white border border-white/20 rounded-lg px-4 py-2.5 text-gray-900 text-sm placeholder:text-gray-400 focus:outline-none focus:border-primary resize-none"
             />
           </div>
         </section>

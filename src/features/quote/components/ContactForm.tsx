@@ -28,7 +28,7 @@ export function ContactForm({ data, onChange }: ContactFormProps) {
             value={data.location}
             onChange={(e) => handleChange("location", e.target.value)}
             placeholder="장소를 입력하세요"
-            className="flex-1 bg-transparent border border-white/20 rounded-lg px-4 py-2.5 text-white text-sm placeholder:text-white/40 focus:outline-none focus:border-primary"
+            className="flex-1 bg-white border border-white/20 rounded-lg px-4 py-2.5 text-gray-900 text-sm placeholder:text-gray-400 focus:outline-none focus:border-primary"
           />
         </div>
 
@@ -41,7 +41,7 @@ export function ContactForm({ data, onChange }: ContactFormProps) {
               value={data.area}
               onChange={(e) => handleChange("area", e.target.value)}
               placeholder="0"
-              className="flex-1 bg-transparent border border-white/20 rounded-lg px-4 py-2.5 text-white text-sm placeholder:text-white/40 focus:outline-none focus:border-primary"
+              className="flex-1 bg-white border border-white/20 rounded-lg px-4 py-2.5 text-gray-900 text-sm placeholder:text-gray-400 focus:outline-none focus:border-primary"
             />
             <span className="text-white/70 text-sm">m²</span>
           </div>
@@ -55,7 +55,7 @@ export function ContactForm({ data, onChange }: ContactFormProps) {
             value={data.name}
             onChange={(e) => handleChange("name", e.target.value)}
             placeholder="이름을 입력하세요"
-            className="flex-1 bg-transparent border border-white/20 rounded-lg px-4 py-2.5 text-white text-sm placeholder:text-white/40 focus:outline-none focus:border-primary"
+            className="flex-1 bg-white border border-white/20 rounded-lg px-4 py-2.5 text-gray-900 text-sm placeholder:text-gray-400 focus:outline-none focus:border-primary"
           />
         </div>
       </div>
