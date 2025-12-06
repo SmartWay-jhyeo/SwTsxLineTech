@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Menu } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { MobileMenu } from "./MobileMenu";
 
 type HeaderProps = {
   className?: string;
@@ -13,6 +14,7 @@ type HeaderProps = {
 export function Header({ className }: HeaderProps) {
   const [isHidden, setIsHidden] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const lastScrollY = useRef(0);
 
   useEffect(() => {
@@ -58,11 +60,14 @@ export function Header({ className }: HeaderProps) {
 
       <button
         type="button"
+        onClick={() => setIsMenuOpen(true)}
         className="absolute right-6 p-1 text-white hover:opacity-80 transition-opacity pointer-events-auto"
         aria-label="메뉴 열기"
       >
         <Menu size={28} strokeWidth={2} />
       </button>
+
+      <MobileMenu isOpen={isMenuOpen} onClose={() => setIsMenuOpen(false)} />
     </header>
   );
 }

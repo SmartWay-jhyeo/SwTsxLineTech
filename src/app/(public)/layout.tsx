@@ -1,4 +1,6 @@
 import { Header } from "@/components/shared/Header";
+import { Chatbot } from "@/components/shared/Chatbot";
+import { YouTubeButton } from "@/components/shared/YouTubeButton";
 
 type PublicLayoutProps = {
   children: React.ReactNode;
@@ -9,6 +11,8 @@ export default function Layout({ children }: PublicLayoutProps) {
     <>
       <Header />
       <main>{children}</main>
+      <Chatbot />
+      <YouTubeButton />
     </>
   );
 }
