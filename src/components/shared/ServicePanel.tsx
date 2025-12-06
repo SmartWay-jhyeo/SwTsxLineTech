@@ -34,13 +34,13 @@ export function ServicePanel({
           src={backgroundImage}
           alt={title}
           fill
-          className="object-cover blur-md scale-100 transition-all duration-500 ease-out group-hover:blur-sm group-hover:scale-110"
+          className="object-cover blur-md scale-100 brightness-110 transition-all duration-500 ease-out group-hover:blur-sm group-hover:scale-110 group-hover:brightness-125"
           sizes="(max-width: 768px) 100vw, 33vw"
         />
       </div>
 
       {/* Dark Gradient Overlay - hover: 밝아짐 */}
-      <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/20 to-black/50 transition-all duration-500 group-hover:from-black/30 group-hover:via-black/10 group-hover:to-black/40" />
+      <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/10 to-black/40 transition-all duration-500 group-hover:from-black/20 group-hover:via-black/5 group-hover:to-black/30" />
 
       {/* Content */}
       <div className="relative h-full flex flex-col items-center justify-center text-white">
