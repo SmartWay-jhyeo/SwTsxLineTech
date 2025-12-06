@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { ArrowRight, Calculator, ChevronUp, Check, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -36,6 +37,13 @@ export function PaintQuoteForm({ pricingRules }: PaintQuoteFormProps) {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isMobilePanelOpen, setIsMobilePanelOpen] = useState(false);
+
+  // Image Source
+  const currentImage = useMemo(() => {
+    return paintType === "interior" 
+      ? "/images/in_out_paint/inpaint.jpg"
+      : "/images/in_out_paint/outpaint.jpg";
+  }, [paintType]);
 
   // Calculate Price
   const priceBreakdown = useMemo(() => {
@@ -190,6 +198,28 @@ export function PaintQuoteForm({ pricingRules }: PaintQuoteFormProps) {
   return (
     <div className="lg:grid lg:grid-cols-[1fr_340px] lg:gap-8">
       <div className="space-y-8 pb-32 lg:pb-8">
+        {/* 이미지 미리보기 */}
+        <div className="relative w-full aspect-video rounded-xl overflow-hidden border-2 border-white/10 shadow-lg">
+          <Image
+            src={currentImage}
+            alt={paintType === "interior" ? "내부 도장" : "외부 도장"}
+            fill
+            className="object-cover transition-opacity duration-300"
+            priority
+          />
+          {/* 텍스트 오버레이 */}
+          <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/80 to-transparent">
+            <h2 className="text-white text-xl font-bold">
+              {paintType === "interior" ? "내부 도장" : "외부 도장"}
+            </h2>
+            <p className="text-white/70 text-sm">
+              {paintType === "interior" 
+                ? "실내 공간을 쾌적하고 깔끔하게 마감합니다" 
+                : "건물의 첫인상을 결정하는 외벽 도장입니다"}
+            </p>
+          </div>
+        </div>
+
         {/* 면적 */}
         <section className="space-y-3">
           <h3 className="text-white text-sm font-medium flex items-center gap-2">
