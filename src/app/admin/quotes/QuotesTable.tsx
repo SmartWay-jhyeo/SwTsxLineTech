@@ -324,7 +324,7 @@ export function QuotesTable({ quotes }: { quotes: Quote[] }) {
 
             {/* Options (condensed) */}
             {quote.options && Object.keys(quote.options).length > 0 && (
-              <div className="text-xs bg-blue-50 p-2 rounded">
+              <div className="text-xs text-gray-900 bg-blue-50 p-2 rounded">
                 {quote.service_type === "lane" ? (
                   <>
                     <div><span className="text-gray-500">작업:</span> {(quote.options as { workType?: string }).workType === "new" ? "신규 도색" : "기존 덧칠"}</div>
@@ -343,7 +343,7 @@ export function QuotesTable({ quotes }: { quotes: Quote[] }) {
 
             {/* Notes (truncated) */}
             {quote.notes && (
-              <div className="text-xs bg-gray-50 p-2 rounded line-clamp-2">
+              <div className="text-xs text-gray-900 bg-gray-50 p-2 rounded line-clamp-2">
                 <span className="text-gray-500">메모:</span> {quote.notes}
               </div>
             )}
