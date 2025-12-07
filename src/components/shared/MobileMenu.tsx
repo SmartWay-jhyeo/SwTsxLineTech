@@ -75,7 +75,7 @@ export function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
       {/* Drawer */}
       <div
         className={cn(
-          "fixed top-0 right-0 h-full w-80 bg-background border-l border-white/10 z-50 transition-transform duration-300 ease-out overflow-y-auto",
+          "fixed top-0 right-0 h-full w-[min(320px,85vw)] bg-background border-l border-white/10 z-50 transition-transform duration-300 ease-out overflow-y-auto",
           isOpen ? "translate-x-0" : "translate-x-full"
         )}
       >

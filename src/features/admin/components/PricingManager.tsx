@@ -97,7 +97,7 @@ export function PricingManager({ initialRules }: PricingManagerProps) {
                 <h4 className="text-sm font-medium text-gray-500 mb-4 uppercase tracking-wider">
                   {categoryLabels[category] || category}
                 </h4>
-                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
                   {categoryRules.map((rule) => (
                     <div key={rule.id} className="flex flex-col p-4 rounded-lg border border-gray-200 bg-white hover:border-primary/50 transition-colors">
                       <div className="mb-2">

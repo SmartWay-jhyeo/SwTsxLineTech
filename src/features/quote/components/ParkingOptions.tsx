@@ -44,23 +44,23 @@ function Counter({ label, description, value, onChange, min = 0, max = 999 }: Co
           <p className="text-white/50 text-xs mt-0.5">{description}</p>
         )}
       </div>
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-2 sm:gap-3">
         <button
           type="button"
           onClick={decrease}
           disabled={value <= min}
-          className="w-8 h-8 flex items-center justify-center rounded-full bg-white/10 text-white hover:bg-white/20 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+          className="w-11 h-11 sm:w-8 sm:h-8 flex items-center justify-center rounded-full bg-white/10 text-white hover:bg-white/20 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
         >
-          <Minus size={16} />
+          <Minus size={18} className="sm:w-4 sm:h-4" />
         </button>
-        <span className="text-white text-lg font-medium w-8 text-center">{value}</span>
+        <span className="text-white text-lg font-medium w-10 sm:w-8 text-center">{value}</span>
         <button
           type="button"
           onClick={increase}
           disabled={value >= max}
-          className="w-8 h-8 flex items-center justify-center rounded-full bg-white/10 text-white hover:bg-white/20 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+          className="w-11 h-11 sm:w-8 sm:h-8 flex items-center justify-center rounded-full bg-white/10 text-white hover:bg-white/20 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
         >
-          <Plus size={16} />
+          <Plus size={18} className="sm:w-4 sm:h-4" />
         </button>
       </div>
     </div>
@@ -97,23 +97,23 @@ function EditableRow({ label, value, autoValue, onChange, required, min = 0, max
           <p className="text-white/40 text-xs mt-0.5">자동 계산: {autoValue}대</p>
         )}
       </div>
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-1 sm:gap-2">
         <button
           type="button"
           onClick={() => value > min && onChange(value - 1)}
           disabled={value <= min}
-          className="w-7 h-7 flex items-center justify-center rounded-full bg-white/10 text-white hover:bg-white/20 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+          className="w-11 h-11 sm:w-7 sm:h-7 flex items-center justify-center rounded-full bg-white/10 text-white hover:bg-white/20 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
         >
-          <Minus size={14} />
+          <Minus size={18} className="sm:w-3.5 sm:h-3.5" />
         </button>
-        <span className="text-white text-lg font-bold w-8 text-center">{value}</span>
+        <span className="text-white text-lg font-bold w-10 sm:w-8 text-center">{value}</span>
         <button
           type="button"
           onClick={() => value < max && onChange(value + 1)}
           disabled={value >= max}
-          className="w-7 h-7 flex items-center justify-center rounded-full bg-white/10 text-white hover:bg-white/20 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+          className="w-11 h-11 sm:w-7 sm:h-7 flex items-center justify-center rounded-full bg-white/10 text-white hover:bg-white/20 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
         >
-          <Plus size={14} />
+          <Plus size={18} className="sm:w-3.5 sm:h-3.5" />
         </button>
       </div>
     </div>

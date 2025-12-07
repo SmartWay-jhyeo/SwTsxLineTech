@@ -108,8 +108,10 @@ export function QuotesTable({ quotes }: { quotes: Quote[] }) {
   };
 
   return (
-    <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-      <table className="min-w-full divide-y divide-gray-200">
+    <>
+      {/* Desktop Table View */}
+      <div className="hidden lg:block bg-white rounded-lg border border-gray-200 overflow-hidden">
+        <table className="min-w-full divide-y divide-gray-200">
         <thead className="bg-gray-50">
           <tr>
             <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
@@ -273,7 +275,93 @@ export function QuotesTable({ quotes }: { quotes: Quote[] }) {
             </tr>
           ))}
         </tbody>
-      </table>
-    </div>
+        </table>
+      </div>
+
+      {/* Mobile Card View */}
+      <div className="lg:hidden space-y-4">
+        {quotes.map((quote) => (
+          <div key={quote.id} className="bg-white rounded-lg border border-gray-200 p-4 space-y-3">
+            {/* Header with date and status */}
+            <div className="flex items-center justify-between">
+              <span className="text-xs text-gray-500">{formatDate(quote.created_at)}</span>
+              <select
+                value={quote.status || "pending"}
+                onChange={(e) => handleStatusChange(quote.id, e.target.value as QuoteStatus)}
+                disabled={updatingId === quote.id || isPending}
+                className={`px-2 py-1 rounded text-xs font-medium border-0 cursor-pointer min-h-[36px] ${
+                  STATUS_COLORS[quote.status || "pending"]
+                } ${updatingId === quote.id ? "opacity-50" : ""}`}
+              >
+                {(Object.entries(STATUS_LABELS) as [QuoteStatus, string][]).map(
+                  ([value, label]) => (
+                    <option key={value} value={value}>
+                      {label}
+                    </option>
+                  )
+                )}
+              </select>
+            </div>
+
+            {/* Service and Area */}
+            <div className="flex items-center gap-2">
+              <span className="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-primary/10 text-primary">
+                {SERVICE_LABELS[quote.service_type] || quote.service_type}
+              </span>
+              <span className="text-sm text-gray-900">{quote.area} m²</span>
+            </div>
+
+            {/* Price */}
+            <div className="text-lg font-medium text-gray-900">
+              {formatPrice(quote.total_cost)}
+            </div>
+
+            {/* Contact */}
+            <div className="text-sm text-gray-900">
+              <div>{quote.contact_name || "-"}</div>
+              <div className="text-gray-500">{quote.contact_phone}</div>
+            </div>
+
+            {/* Options (condensed) */}
+            {quote.options && Object.keys(quote.options).length > 0 && (
+              <div className="text-xs bg-blue-50 p-2 rounded">
+                {quote.service_type === "lane" ? (
+                  <>
+                    <div><span className="text-gray-500">작업:</span> {(quote.options as { workType?: string }).workType === "new" ? "신규 도색" : "기존 덧칠"}</div>
+                    <div><span className="text-gray-500">위치:</span> {(quote.options as { locationType?: string }).locationType === "ground" ? "지상" : "지하"}</div>
+                  </>
+                ) : (
+                  <>
+                    <div><span className="text-gray-500">마감재:</span> {(quote.options as EpoxyOptions).material || "-"}</div>
+                    {(quote.options as EpoxyOptions).finish && (
+                      <div><span className="text-gray-500">광택:</span> {(quote.options as EpoxyOptions).finish}</div>
+                    )}
+                  </>
+                )}
+              </div>
+            )}
+
+            {/* Notes (truncated) */}
+            {quote.notes && (
+              <div className="text-xs bg-gray-50 p-2 rounded line-clamp-2">
+                <span className="text-gray-500">메모:</span> {quote.notes}
+              </div>
+            )}
+
+            {/* Delete button */}
+            <div className="flex justify-end pt-2 border-t border-gray-100">
+              <button
+                onClick={() => handleDelete(quote.id, (quote.options as EpoxyOptions)?.photoUrls)}
+                disabled={deletingId === quote.id || isPending}
+                className="p-2 min-w-[44px] min-h-[44px] text-red-600 hover:text-red-800 hover:bg-red-50 rounded transition-colors disabled:opacity-50 flex items-center justify-center"
+                title="삭제"
+              >
+                <Trash2 size={18} />
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
+    </>
   );
 }

@@ -282,13 +282,13 @@ export const ParkingAreaMap = forwardRef<ParkingAreaMapRef, ParkingAreaMapProps>
           onMouseEnter={() => setShowHelp(true)}
           onMouseLeave={() => setShowHelp(false)}
         >
-          <div className="w-8 h-8 bg-white/20 hover:bg-white/30 rounded-full flex items-center justify-center cursor-help transition-colors">
-            <HelpCircle size={18} className="text-white/70" />
+          <div className="w-11 h-11 sm:w-8 sm:h-8 bg-white/20 hover:bg-white/30 rounded-full flex items-center justify-center cursor-help transition-colors">
+            <HelpCircle size={20} className="sm:w-[18px] sm:h-[18px] text-white/70" />
           </div>
 
           {/* 도움말 툴팁 */}
           {showHelp && (
-            <div className="absolute top-10 left-0 bg-white rounded-lg shadow-xl p-3 z-20 min-w-[320px]">
+            <div className="absolute top-12 sm:top-10 left-0 bg-white rounded-lg shadow-xl p-3 z-20 w-[280px] sm:w-auto sm:min-w-[320px] max-w-[90vw]">
               <Image
                 src="/images/manual-region2.gif"
                 alt="사용 방법 안내"
@@ -297,7 +297,7 @@ export const ParkingAreaMap = forwardRef<ParkingAreaMapRef, ParkingAreaMapProps>
                 className="rounded w-full h-auto"
                 unoptimized
               />
-              <p className="text-sm text-gray-600 mt-2 text-center whitespace-nowrap">
+              <p className="text-sm text-gray-600 mt-2 text-center whitespace-normal sm:whitespace-nowrap">
                 영역의 모서리를 클릭하여 측정하세요
               </p>
             </div>
@@ -308,7 +308,7 @@ export const ParkingAreaMap = forwardRef<ParkingAreaMapRef, ParkingAreaMapProps>
         <div className="relative flex-1">
           <div
             ref={mapContainerRef}
-            className="w-full h-[500px] rounded-lg overflow-hidden bg-gray-800"
+            className="w-full h-[300px] sm:h-[400px] md:h-[500px] rounded-lg overflow-hidden bg-gray-800"
           />
 
           {!isMapLoaded && (

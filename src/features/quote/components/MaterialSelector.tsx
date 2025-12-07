@@ -31,16 +31,16 @@ export function MaterialSelector({
             type="button"
             onClick={() => onSelect(option.id)}
             className={cn(
-              "w-full text-left px-4 py-3 rounded-lg transition-all duration-200",
+              "w-full text-left px-4 py-3 min-h-[48px] rounded-lg transition-all duration-200",
               "border text-sm",
               selectedId === option.id
                 ? "bg-primary border-primary text-white"
                 : "bg-transparent border-white/20 text-white/70 hover:border-white/40"
             )}
           >
-            <span>{option.label}</span>
+            <span className="break-words">{option.label}</span>
             {option.description && (
-              <span className="block text-xs mt-1 opacity-70">
+              <span className="block text-xs mt-1 opacity-70 break-words">
                 {option.description}
               </span>
             )}

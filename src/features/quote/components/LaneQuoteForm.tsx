@@ -181,7 +181,7 @@ export function LaneQuoteForm({ className, pricingRules }: LaneQuoteFormProps) {
           </span>
           <h3 className="text-white font-medium">작업 유형을 선택하세요</h3>
         </div>
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <button
             type="button"
             onClick={() => { setWorkType("new"); setStep1Completed(true); }}
@@ -223,7 +223,7 @@ export function LaneQuoteForm({ className, pricingRules }: LaneQuoteFormProps) {
             </span>
             <h3 className="text-white font-medium">주차장 위치를 선택하세요</h3>
           </div>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <button
               type="button"
               onClick={() => { setLocationType("ground"); setStep2Completed(true); }}

@@ -24,7 +24,7 @@ export function ServicePanel({
   return (
     <div
       className={cn(
-        "group relative flex-1 h-full overflow-hidden cursor-pointer",
+        "group relative flex-1 min-h-[33vh] md:min-h-0 md:h-full overflow-hidden cursor-pointer",
         className
       )}
     >
@@ -45,12 +45,12 @@ export function ServicePanel({
       {/* Content */}
       <div className="relative h-full flex flex-col items-center justify-center text-white">
         {/* Title */}
-        <h2 className="text-[36px] leading-[52px] tracking-[2px] text-center font-bold whitespace-pre-line mb-8 drop-shadow-lg">
+        <h2 className="text-2xl sm:text-3xl md:text-[36px] leading-tight md:leading-[52px] tracking-[1px] md:tracking-[2px] text-center font-bold whitespace-pre-line mb-4 sm:mb-6 md:mb-8 drop-shadow-lg">
           {title}
         </h2>
 
                 {/* Buttons */}
-                <div className="flex flex-col gap-4 w-[158px] pt-4">
+                <div className="flex flex-col gap-3 sm:gap-4 w-full max-w-[200px] px-4 sm:px-0 pt-4">
                   <Button
                     asChild
                     variant="outline"
