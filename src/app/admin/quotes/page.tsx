@@ -1,6 +1,8 @@
 import { getQuotes, updateQuoteStatus, type QuoteStatus } from "@/features/quote/actions";
 import { QuotesTable } from "./QuotesTable";
 
+export const dynamic = "force-dynamic";
+
 export default async function AdminQuotesPage() {
   const { data: quotes, success, error } = await getQuotes();
 
