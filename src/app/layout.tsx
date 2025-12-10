@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Noto_Sans_KR } from "next/font/google";
 import Script from "next/script";
 import { Footer } from "@/components/shared/Footer";
+import { JsonLd } from "@/components/shared/JsonLd";
 import "./globals.css";
 
 const notoSansKR = Noto_Sans_KR({
@@ -34,6 +35,9 @@ export const metadata: Metadata = {
   authors: [{ name: "라인테크" }],
   creator: "라인테크",
   publisher: "라인테크",
+  alternates: {
+    canonical: "/",
+  },
   openGraph: {
     type: "website",
     locale: "ko_KR",
@@ -42,6 +46,14 @@ export const metadata: Metadata = {
     title: "시공얼마 | 차선도색 & 바닥도장 무료 견적",
     description:
       "주차장 차선도색, 바닥 에폭시, 우레탄방수, 도장공사 전문. 1분만에 무료 견적!",
+    images: [
+      {
+        url: "/images/logo.png",
+        width: 800,
+        height: 600,
+        alt: "시공얼마 로고",
+      },
+    ],
   },
   robots: {
     index: true,
@@ -72,6 +84,7 @@ export default function Layout({
         />
       </head>
       <body className={`${notoSansKR.variable} font-sans antialiased`}>
+        <JsonLd />
         {children}
         <Footer />
       </body>

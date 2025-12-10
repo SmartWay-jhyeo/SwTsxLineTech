@@ -12,6 +12,7 @@ type ServicePanelProps = {
   portfolioLink: string;
   quoteLink: string;
   className?: string;
+  priority?: boolean;
 };
 
 export function ServicePanel({
@@ -20,6 +21,7 @@ export function ServicePanel({
   portfolioLink,
   quoteLink,
   className,
+  priority = false,
 }: ServicePanelProps) {
   return (
     <div
@@ -34,6 +36,7 @@ export function ServicePanel({
           src={backgroundImage}
           alt={title}
           fill
+          priority={priority}
           className="object-cover blur-md scale-100 saturate-50 brightness-110 transition-all duration-500 ease-out group-hover:blur-sm group-hover:scale-110 group-hover:saturate-75 group-hover:brightness-110"
           sizes="(max-width: 768px) 100vw, 33vw"
         />

@@ -39,6 +39,7 @@ export default function Page() {
             backgroundImage={service.backgroundImage}
             portfolioLink={service.portfolioLink}
             quoteLink={service.quoteLink}
+            priority={true}
           />
         ))}
       </div>
