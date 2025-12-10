@@ -2,8 +2,46 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { QuoteForm } from "@/features/quote/components/QuoteForm";
 import { getPricingRules } from "@/features/quote/actions";
+import { Metadata } from "next";
 
 type ServiceType = "lane" | "epoxy" | "paint";
+
+const serviceMeta: Record<string, { title: string; description: string; keywords: string[] }> = {
+  lane: {
+    title: "차선 도색 견적",
+    description: "주차장 차선, 주차선 도색 견적을 1분만에 무료로 받아보세요. 장애인석, 전기차 충전구역 포함.",
+    keywords: ["차선 도색", "주차선", "주차장 라인", "차선 시공", "주차장 도색"],
+  },
+  epoxy: {
+    title: "에폭시 시공 견적",
+    description: "바닥 에폭시, 우레탄 방수, 셀프레벨링 시공 견적. 재료와 마감 선택 후 즉시 견적 확인.",
+    keywords: ["에폭시 시공", "바닥 에폭시", "우레탄 방수", "셀프레벨링", "바닥 코팅"],
+  },
+  paint: {
+    title: "도장 공사 견적",
+    description: "내부 도장, 외부 도장, 방수 페인트 시공 견적. 색상과 마감 선택 후 무료 견적.",
+    keywords: ["도장 공사", "페인트 시공", "내부 도장", "외부 도장", "방수 페인트"],
+  },
+};
+
+type MetadataProps = {
+  params: Promise<{ service: string }>;
+};
+
+export async function generateMetadata({ params }: MetadataProps): Promise<Metadata> {
+  const { service } = await params;
+  const meta = serviceMeta[service] || serviceMeta.lane;
+
+  return {
+    title: meta.title,
+    description: meta.description,
+    keywords: meta.keywords,
+    openGraph: {
+      title: `${meta.title} | 시공얼마`,
+      description: meta.description,
+    },
+  };
+}
 
 type QuotePageProps = {
   params: Promise<{

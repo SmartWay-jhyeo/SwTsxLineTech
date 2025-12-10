@@ -4,6 +4,17 @@ import { CategoryFilter } from "@/features/portfolio/components/CategoryFilter";
 import { ProjectCard } from "@/features/portfolio/components/ProjectCard";
 import { createClient } from "@/lib/supabase/server";
 import { ServiceType, PortfolioCategory } from "@/types";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "시공 실적",
+  description: "라인테크의 차선도색, 에폭시, 도장 시공 실적 포트폴리오. 아파트, 공장, 상가 등 다양한 시공 사례를 확인하세요.",
+  keywords: ["시공 실적", "포트폴리오", "차선 시공 사례", "에폭시 시공 사례", "도장 시공 사례"],
+  openGraph: {
+    title: "시공 실적 | 시공얼마",
+    description: "라인테크의 차선도색, 에폭시, 도장 시공 실적 포트폴리오",
+  },
+};
 
 export default async function Page({
   searchParams,
