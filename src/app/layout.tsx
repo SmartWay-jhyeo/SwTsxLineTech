@@ -31,6 +31,8 @@ export const metadata: Metadata = {
     "공장 바닥",
     "창고 바닥",
     "시공 견적",
+    "주차장도색",
+    "주차장도색 견적",
   ],
   authors: [{ name: "라인테크" }],
   creator: "라인테크",

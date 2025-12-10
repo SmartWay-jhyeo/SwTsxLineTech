@@ -10,7 +10,7 @@ const serviceMeta: Record<string, { title: string; description: string; keywords
   lane: {
     title: "차선 도색 견적",
     description: "주차장 차선, 주차선 도색 견적을 1분만에 무료로 받아보세요. 장애인석, 전기차 충전구역 포함.",
-    keywords: ["차선 도색", "주차선", "주차장 라인", "차선 시공", "주차장 도색"],
+    keywords: ["차선 도색", "주차선", "주차장 라인", "차선 시공", "주차장 도색", "주차장도색", "주차장도색 견적"],
   },
   epoxy: {
     title: "에폭시 시공 견적",
