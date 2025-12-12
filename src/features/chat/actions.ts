@@ -1,6 +1,9 @@
 "use server";
 
+import { GoogleGenerativeAI } from "@google/generative-ai";
+
 const apiKey = process.env.GEMINI_API_KEY;
+const genAI = new GoogleGenerativeAI(apiKey || "");
 
 const SYSTEM_PROMPT = `
 당신은 '시공얼마'의 AI 상담원입니다. 고객의 질문에 친절하고 전문적으로 답변해 주세요.
@@ -32,58 +35,33 @@ const SYSTEM_PROMPT = `
 
 export async function getChatResponse(userMessage: string) {
   try {
-    console.log("Attempting to call Gemini API (via fetch)...");
-    console.log("API Key loaded:", apiKey ? `Yes (${apiKey.substring(0, 4)}...)` : "No");
-
+    console.log("Using Google Generative AI SDK...");
+    
     if (!apiKey) {
-      console.error("Missing Gemini API Key in environment variables.");
+      console.error("Missing Gemini API Key");
       return { error: "API 키가 설정되지 않았습니다." };
     }
 
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${apiKey}`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          contents: [
-            {
-              role: "user",
-              parts: [
-                {
-                  text: `${SYSTEM_PROMPT}\n\nUser Question: ${userMessage}`,
-                },
-              ],
-            },
-          ],
-          generationConfig: {
-            maxOutputTokens: 200,
-          },
-        }),
-      }
-    );
+    // Gemini 1.5 Flash 모델 사용
+    const model = genAI.getGenerativeModel({ 
+      model: "gemini-1.5-flash",
+      systemInstruction: SYSTEM_PROMPT,
+    });
 
-    if (!response.ok) {
-      const errorData = await response.json();
-      console.error("Gemini API HTTP Error:", JSON.stringify(errorData, null, 2));
-      return { error: `오류가 발생했습니다. (Code: ${response.status})` };
-    }
+    const chat = model.startChat({
+      history: [],
+      generationConfig: {
+        maxOutputTokens: 200,
+      },
+    });
 
-    const data = await response.json();
-    console.log("Gemini Response Data:", JSON.stringify(data, null, 2));
-
-    const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
-
-    if (!text) {
-      console.error("No text found in response:", data);
-      return { error: "답변을 생성하지 못했습니다." };
-    }
+    const result = await chat.sendMessage(userMessage);
+    const response = await result.response;
+    const text = response.text();
 
     return { content: text };
   } catch (error) {
-    console.error("Gemini API Error Detail:", error);
-    return { error: "죄송합니다. 잠시 후 다시 시도해 주세요. (서버 에러)" };
+    console.error("Gemini SDK Error:", error);
+    return { error: "죄송합니다. 잠시 후 다시 시도해 주세요. (AI 서버 응답 없음)" };
   }
 }
