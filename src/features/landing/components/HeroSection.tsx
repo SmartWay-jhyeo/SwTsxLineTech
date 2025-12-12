@@ -10,13 +10,14 @@ export async function HeroSection() {
       {/* Background Image Slider (Static for now, can be slider later) */}
       <div className="absolute inset-0 z-0">
         <Image
-          src="/images/bg-epoxy.jpg"
+          src="/images/epoxy/gravel_beige.jpg"
           alt="Background"
           fill
-          className="object-cover opacity-50"
+          className="object-cover opacity-80" // 밝은 이미지라 투명도 높임
           priority
         />
-        <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/50 to-transparent" />
+        {/* 오버레이를 좀 더 진하게 해서 흰 글씨 확보 */}
+        <div className="absolute inset-0 bg-black/60" /> 
         <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent" />
       </div>
 
@@ -27,15 +28,15 @@ export async function HeroSection() {
             <span className="text-primary font-bold text-sm tracking-wide">3초 만에 확인하는 투명한 견적</span>
           </div>
           
-          <h1 className="text-4xl md:text-6xl font-extrabold text-white tracking-tight" style={{ lineHeight: '1.2' }}>
-            건물 바닥·도색 시공<br />
-            <span className="text-primary">부르는 게 값</span>이라<br />
-            불안하셨나요?
+          <h1 className="text-4xl md:text-6xl font-extrabold text-white tracking-tight" style={{ lineHeight: '1.3' }}>
+            우리 건물 바닥과 페인트,<br />
+            <span className="text-primary">호구 잡히지 않는 가격</span>은<br />
+            얼마일까?
           </h1>
           
-          <p className="text-lg text-white/70 max-w-xl mx-auto lg:mx-0">
-            주먹구구식 견적은 이제 그만. 시공얼마의 데이터 기반 자동 견적 시스템으로
-            3초 만에 우리 건물 시공비를 투명하게 확인하세요.
+          <p className="text-lg text-white/80 max-w-xl mx-auto lg:mx-0 font-medium">
+            상가, 빌라, 공장까지. 주먹구구식 견적은 이제 그만.<br className="hidden md:block" />
+            시공얼마의 데이터 기반 정찰제로 3초 만에 확인하세요.
           </p>
 
           <div className="flex flex-wrap gap-8 justify-center lg:justify-start pt-4">
