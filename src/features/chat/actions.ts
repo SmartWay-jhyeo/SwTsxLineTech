@@ -54,15 +54,10 @@ export async function getChatResponse(userMessage: string) {
     }
     */
    
-    // 404 해결을 위한 모델명 변경 시도: 'gemini-1.5-flash-latest' 또는 'gemini-1.0-pro'
-    // 현재 에러 메시지로 보아 1.5 flash가 v1beta에서 안 잡히는 듯함.
-    // 가장 안전한 'gemini-1.0-pro'로 시도.
-    console.log("Using model: gemini-1.0-pro");
-    const model = genAI.getGenerativeModel({ 
-      model: "gemini-1.0-pro", 
-      // gemini-1.0-pro may not support systemInstruction in v1beta SDK depending on version.
-      // If it fails, we will revert to prompt injection.
-      // But let's try this standard first.
+    // gemini-2.0-flash 모델 사용 (gemini-1.0-pro는 지원 중단됨)
+    console.log("Using model: gemini-2.0-flash");
+    const model = genAI.getGenerativeModel({
+      model: "gemini-2.0-flash",
     });
 
     const chat = model.startChat({
