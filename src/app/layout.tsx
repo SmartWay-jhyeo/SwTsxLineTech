@@ -75,7 +75,7 @@ export const metadata: Metadata = {
       "주차장 차선도색, 바닥 에폭시, 우레탄방수, 도장공사 전문. 1분만에 무료 견적!",
     images: [
       {
-        url: "/images/logo.png",
+        url: "/images/logo2.png",
         width: 800,
         height: 600,
         alt: "시공얼마 로고",

@@ -1,5 +1,8 @@
 # Gemini's Failure Analysis & Learning Log
 
+## 0. General Instructions
+- **Language:** Always answer in Korean (한국어) unless explicitly requested otherwise.
+
 ## 1. Next.js App Router Export Rules (Critical)
 - **Failure:** `src/app/(public)/layout.tsx` and `page.tsx` files failed Vercel build with "is not a valid Page/Layout export field".
 - **Cause:** Mixed use of named exports (`export function X`) and default exports (`export default X`) caused confusion in Next.js build system.

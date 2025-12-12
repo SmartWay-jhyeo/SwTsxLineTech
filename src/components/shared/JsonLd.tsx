@@ -5,8 +5,8 @@ export function JsonLd() {
     name: "라인테크",
     alternateName: "시공얼마",
     url: "https://시공얼마.com",
-    logo: "https://시공얼마.com/images/logo.png",
-    image: "https://시공얼마.com/images/logo.png",
+    logo: "https://시공얼마.com/images/logo2.png",
+    image: "https://시공얼마.com/images/logo2.png",
     description:
       "주차장 차선도색, 바닥 에폭시, 우레탄방수, 도장공사 전문. 1분만에 무료 견적 받아보세요. 라인테크 공식 견적 시스템.",
     telephone: "031-575-1012",

@@ -48,15 +48,17 @@ export function Header({ className }: HeaderProps) {
         className
       )}
     >
-      <Link href="/" className="absolute left-1/2 -translate-x-1/2 pointer-events-auto">
-        <Image
-          src="/images/logo.png"
-          alt="라인테크"
-          width={170}
-          height={32}
-          priority
-        />
-      </Link>
+          <Link href="/" className="flex items-center space-x-2">
+            <div className="relative h-10 w-40">
+              <Image
+                src="/images/logo2.png"
+                alt="라인테크"
+                fill
+                className="object-contain"
+                priority
+              />
+            </div>
+          </Link>
 
       <button
         type="button"
