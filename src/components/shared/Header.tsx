@@ -51,7 +51,7 @@ export function Header({ className }: HeaderProps) {
           <Link href="/" className="flex items-center space-x-2">
             <div className="relative h-10 w-40">
               <Image
-                src="/images/logo2.png"
+                src="/images/logo3.png"
                 alt="라인테크"
                 fill
                 className="object-contain"
