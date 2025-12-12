@@ -2,8 +2,8 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { updateQuoteStatus, deleteQuote, type QuoteStatus } from "@/features/quote/actions";
-import { Trash2 } from "lucide-react";
+import { updateQuoteStatus, updateQuoteAssignment, deleteQuote, type QuoteStatus } from "@/features/quote/actions";
+import { Trash2, Building2, UserCheck, Banknote } from "lucide-react";
 
 type Quote = {
   id: string;
@@ -16,6 +16,10 @@ type Quote = {
   notes: string | null;
   status: QuoteStatus;
   options: Record<string, unknown>;
+  // New columns
+  assignment_type?: 'direct' | 'brokerage' | 'pending';
+  brokerage_memo?: string;
+  commission?: number;
 };
 
 type EpoxyOptions = {
@@ -33,31 +37,38 @@ type EpoxyOptions = {
   antiSlip?: boolean;
   surfaceProtection?: boolean;
   photoUrls?: string[];
+  isSimpleLead?: boolean; // 간편 견적 여부
 };
 
 const STATUS_LABELS: Record<QuoteStatus, string> = {
   pending: "대기",
-  confirmed: "확정",
+  confirmed: "진행중",
   completed: "완료",
   cancelled: "취소",
 };
 
 const STATUS_COLORS: Record<QuoteStatus, string> = {
-  pending: "bg-yellow-100 text-yellow-800",
+  pending: "bg-gray-100 text-gray-800",
   confirmed: "bg-blue-100 text-blue-800",
   completed: "bg-green-100 text-green-800",
-  cancelled: "bg-gray-100 text-gray-500",
+  cancelled: "bg-red-50 text-red-500",
+};
+
+const ASSIGNMENT_LABELS = {
+  pending: "미배정",
+  direct: "직영 시공",
+  brokerage: "중개 매칭",
 };
 
 const SERVICE_LABELS: Record<string, string> = {
   lane: "차선",
   epoxy: "에폭시",
+  paint: "페인트",
 };
 
 function formatDate(dateString: string) {
   const date = new Date(dateString);
   return date.toLocaleDateString("ko-KR", {
-    year: "numeric",
     month: "2-digit",
     day: "2-digit",
     hour: "2-digit",
@@ -66,37 +77,56 @@ function formatDate(dateString: string) {
 }
 
 function formatPrice(price: number) {
-  return new Intl.NumberFormat("ko-KR").format(price) + "원";
+  return new Intl.NumberFormat("ko-KR").format(price);
 }
 
 export function QuotesTable({ quotes }: { quotes: Quote[] }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [updatingId, setUpdatingId] = useState<string | null>(null);
-  const [deletingId, setDeletingId] = useState<string | null>(null);
+  
+  // Modal State for Assignment
+  const [selectedQuote, setSelectedQuote] = useState<Quote | null>(null);
+  const [assignmentType, setAssignmentType] = useState<'direct' | 'brokerage'>('direct');
+  const [brokerMemo, setBrokerMemo] = useState("");
+  const [commission, setCommission] = useState("50000");
 
-  const handleStatusChange = async (id: string, newStatus: QuoteStatus) => {
-    setUpdatingId(id);
-    const result = await updateQuoteStatus(id, newStatus);
+  const openAssignmentModal = (quote: Quote) => {
+    setSelectedQuote(quote);
+    setAssignmentType(quote.assignment_type === 'brokerage' ? 'brokerage' : 'direct');
+    setBrokerMemo(quote.brokerage_memo || "");
+    setCommission(quote.commission?.toString() || "50000");
+  };
+
+  const closeAssignmentModal = () => {
+    setSelectedQuote(null);
+  };
+
+  const handleAssignmentSubmit = async () => {
+    if (!selectedQuote) return;
+
+    const result = await updateQuoteAssignment(selectedQuote.id, {
+      assignment_type: assignmentType,
+      brokerage_memo: assignmentType === 'brokerage' ? brokerMemo : undefined,
+      commission: assignmentType === 'brokerage' ? parseInt(commission) : 0,
+      status: 'confirmed', // 배정하면 자동으로 진행중 상태로 변경
+    });
 
     if (result.success) {
       startTransition(() => {
         router.refresh();
       });
+      closeAssignmentModal();
     } else {
-      alert("상태 변경 실패: " + result.error);
+      alert("업데이트 실패: " + result.error);
     }
-    setUpdatingId(null);
   };
 
   const handleDelete = async (id: string, photoUrls?: string[]) => {
-    if (!confirm("정말 이 견적을 삭제하시겠습니까?\n삭제된 데이터는 복구할 수 없습니다.")) {
+    if (!confirm("정말 이 견적을 삭제하시겠습니까?\n 삭제된 데이터는 복구할 수 없습니다.")) {
       return;
     }
-
-    setDeletingId(id);
     const result = await deleteQuote(id, photoUrls);
-
     if (result.success) {
       startTransition(() => {
         router.refresh();
@@ -104,69 +134,60 @@ export function QuotesTable({ quotes }: { quotes: Quote[] }) {
     } else {
       alert("삭제 실패: " + result.error);
     }
-    setDeletingId(null);
   };
 
   return (
     <>
-      {/* Desktop Table View */}
-      <div className="hidden lg:block bg-white rounded-lg border border-gray-200 overflow-hidden">
+      <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
         <table className="min-w-full divide-y divide-gray-200">
-        <thead className="bg-gray-50">
-          <tr>
-            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-              접수일시
-            </th>
-            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-              서비스
-            </th>
-            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-              면적
-            </th>
-            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-              예상 견적
-            </th>
-            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-              연락처
-            </th>
-            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-              요청사항
-            </th>
-            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-              상태
-            </th>
-            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-              작업
-            </th>
-          </tr>
-        </thead>
-        <tbody className="divide-y divide-gray-200">
-          {quotes.map((quote) => (
-            <tr key={quote.id} className="hover:bg-gray-50">
-              <td className="px-4 py-3 text-sm text-gray-900">
-                {formatDate(quote.created_at)}
-              </td>
-              <td className="px-4 py-3 text-sm">
-                <span className="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-primary/10 text-primary">
-                  {SERVICE_LABELS[quote.service_type] || quote.service_type}
-                </span>
-              </td>
-              <td className="px-4 py-3 text-sm text-gray-900">
-                {quote.area} m²
-              </td>
-              <td className="px-4 py-3 text-sm font-medium text-gray-900">
-                {formatPrice(quote.total_cost)}
-              </td>
-              <td className="px-4 py-3 text-sm text-gray-900">
-                <div>{quote.contact_name || "-"}</div>
-                <div className="text-gray-500">{quote.contact_phone}</div>
-              </td>
-              <td className="px-4 py-3 text-sm text-gray-600 max-w-md">
-                <div className="space-y-2">
+          <thead className="bg-gray-50">
+            <tr>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">접수</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">내용</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">견적가</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">고객정보</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">배정 관리</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">관리</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-gray-200">
+            {quotes.map((quote) => (
+              <tr key={quote.id} className="hover:bg-gray-50">
+                {/* 1. 접수일시 */}
+                <td className="px-4 py-3 text-sm text-gray-500 whitespace-nowrap">
+                  {formatDate(quote.created_at)}
+                  <div className="mt-1">
+                    <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium ${STATUS_COLORS[quote.status]}`}>
+                      {STATUS_LABELS[quote.status]}
+                    </span>
+                  </div>
+                </td>
+
+                {/* 2. 내용 (서비스 + 면적 + 옵션요약) */}
+                <td className="px-4 py-3 text-sm">
+                  <div className="font-medium text-gray-900">
+                    [{SERVICE_LABELS[quote.service_type] || quote.service_type}] {quote.area}m²
+                  </div>
+                  
                   {/* options 표시 */}
                   {quote.options && Object.keys(quote.options).length > 0 && (
-                    <div className="text-xs bg-blue-50 p-2 rounded">
-                      {quote.service_type === "lane" ? (
+                    <div className="text-xs bg-blue-50 p-2 rounded mt-1">
+                      {(quote.options as any).isSimpleLead ? (
+                         // 간편 문자 문의인 경우
+                         <div className="flex items-start gap-2">
+                           <span className="shrink-0 px-1.5 py-0.5 bg-green-500 text-white rounded font-bold text-[10px]">
+                             간편문의
+                           </span>
+                           <div>
+                             <div className="font-bold text-gray-700 mb-1">문자로 예상 견적 발송됨</div>
+                             <div className="text-gray-600">
+                               <span className="text-gray-400">지역:</span> {(quote.options as any).location}
+                             </div>
+                           </div>
+                         </div>
+                      ) : (
+                        // 기존 상세 견적
+                        quote.service_type === "lane" ? (
                         <>
                           <div><span className="text-gray-500">작업:</span> {(quote.options as { workType?: string }).workType === "new" ? "신규 도색" : "기존 덧칠"}</div>
                           <div><span className="text-gray-500">위치:</span> {(quote.options as { locationType?: string }).locationType === "ground" ? "지상" : "지하"}</div>
@@ -229,139 +250,164 @@ export function QuotesTable({ quotes }: { quotes: Quote[] }) {
                             </div>
                           )}
                         </>
-                      )}
+                      ))}
                     </div>
                   )}
-                  {/* notes 표시 */}
-                  {quote.notes && (
-                    <div className="text-xs bg-gray-50 p-2 rounded">
-                      <span className="text-gray-500">메모:</span> {quote.notes}
-                    </div>
+                  
+                  {/* Notes for simple lead (already displayed in options, so skip or simplify) */}
+                  {!((quote.options as any).isSimpleLead) && quote.notes && (
+                      <div className="text-xs bg-gray-50 p-2 rounded mt-1">
+                          <span className="text-gray-500">메모:</span> {quote.notes}
+                      </div>
                   )}
-                  {!quote.options && !quote.notes && <span className="text-gray-400">-</span>}
-                </div>
-              </td>
-              <td className="px-4 py-3 text-sm">
-                <select
-                  value={quote.status || "pending"}
-                  onChange={(e) => handleStatusChange(quote.id, e.target.value as QuoteStatus)}
-                  disabled={updatingId === quote.id || isPending}
-                  className={`px-2 py-1 rounded text-xs font-medium border-0 cursor-pointer ${
-                    STATUS_COLORS[quote.status || "pending"]
-                  } ${updatingId === quote.id ? "opacity-50" : ""}`}
-                >
-                  {(Object.entries(STATUS_LABELS) as [QuoteStatus, string][]).map(
-                    ([value, label]) => (
-                      <option key={value} value={value}>
-                        {label}
-                      </option>
-                    )
+                </td>
+
+                {/* 3. 견적가 */}
+                <td className="px-4 py-3 text-sm font-bold text-gray-900">
+                  {formatPrice(quote.total_cost)}원
+                </td>
+
+                {/* 4. 고객정보 */}
+                <td className="px-4 py-3 text-sm">
+                  <div className="text-gray-900">{quote.contact_name}</div>
+                  <div className="text-gray-500 text-xs">{quote.contact_phone}</div>
+                </td>
+
+                {/* 5. 배정 관리 (핵심) */}
+                <td className="px-4 py-3">
+                  {quote.assignment_type === 'brokerage' ? (
+                     // 중개 배정된 경우
+                     <div className="flex flex-col gap-1">
+                       <span className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-purple-100 text-purple-700 text-xs font-medium w-fit">
+                         <UserCheck size={12} /> 중개 매칭
+                       </span>
+                       <div className="text-xs text-gray-600 font-medium">{quote.brokerage_memo}</div>
+                       <div className="text-xs text-green-600 flex items-center gap-1">
+                         <Banknote size={10} /> +{formatPrice(quote.commission || 0)}
+                       </div>
+                       <button onClick={() => openAssignmentModal(quote)} className="text-[10px] text-gray-400 underline text-left">수정</button>
+                     </div>
+                  ) : quote.assignment_type === 'direct' ? (
+                     // 직영 배정된 경우
+                     <div className="flex flex-col gap-1">
+                       <span className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-blue-100 text-blue-700 text-xs font-medium w-fit">
+                         <Building2 size={12} /> 본사 직영
+                       </span>
+                       <button onClick={() => openAssignmentModal(quote)} className="text-[10px] text-gray-400 underline text-left">수정</button>
+                     </div>
+                  ) : (
+                     // 미배정
+                     <button
+                       onClick={() => openAssignmentModal(quote)}
+                       className="px-3 py-1.5 bg-gray-900 text-white text-xs rounded hover:bg-gray-800 transition-colors shadow-sm"
+                     >
+                       배정하기
+                     </button>
                   )}
-                </select>
-              </td>
-              <td className="px-4 py-3 text-sm">
-                <button
-                  onClick={() => handleDelete(
-                    quote.id,
-                    (quote.options as EpoxyOptions)?.photoUrls
-                  )}
-                  disabled={deletingId === quote.id || isPending}
-                  className="p-2 text-red-600 hover:text-red-800 hover:bg-red-50 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                  title="삭제"
-                >
-                  <Trash2 size={16} />
-                </button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
+                </td>
+
+                {/* 6. 관리 (삭제) */}
+                <td className="px-4 py-3 text-sm">
+                  <button
+                    onClick={() => handleDelete(quote.id, (quote.options as EpoxyOptions)?.photoUrls)}
+                    className="text-gray-400 hover:text-red-500 transition-colors"
+                  >
+                    <Trash2 size={18} />
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
         </table>
       </div>
 
-      {/* Mobile Card View */}
-      <div className="lg:hidden space-y-4">
-        {quotes.map((quote) => (
-          <div key={quote.id} className="bg-white rounded-lg border border-gray-200 p-4 space-y-3">
-            {/* Header with date and status */}
-            <div className="flex items-center justify-between">
-              <span className="text-xs text-gray-500">{formatDate(quote.created_at)}</span>
-              <select
-                value={quote.status || "pending"}
-                onChange={(e) => handleStatusChange(quote.id, e.target.value as QuoteStatus)}
-                disabled={updatingId === quote.id || isPending}
-                className={`px-2 py-1 rounded text-xs font-medium border-0 cursor-pointer min-h-[36px] ${
-                  STATUS_COLORS[quote.status || "pending"]
-                } ${updatingId === quote.id ? "opacity-50" : ""}`}
-              >
-                {(Object.entries(STATUS_LABELS) as [QuoteStatus, string][]).map(
-                  ([value, label]) => (
-                    <option key={value} value={value}>
-                      {label}
-                    </option>
-                  )
-                )}
-              </select>
+      {/* Assignment Modal */}
+      {selectedQuote && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
+          <div className="bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden">
+            <div className="p-4 border-b bg-gray-50 flex justify-between items-center">
+              <h3 className="font-bold text-lg">시공 배정 관리</h3>
+              <button onClick={closeAssignmentModal} className="text-gray-500 hover:text-black">✕</button>
             </div>
-
-            {/* Service and Area */}
-            <div className="flex items-center gap-2">
-              <span className="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-primary/10 text-primary">
-                {SERVICE_LABELS[quote.service_type] || quote.service_type}
-              </span>
-              <span className="text-sm text-gray-900">{quote.area} m²</span>
-            </div>
-
-            {/* Price */}
-            <div className="text-lg font-medium text-gray-900">
-              {formatPrice(quote.total_cost)}
-            </div>
-
-            {/* Contact */}
-            <div className="text-sm text-gray-900">
-              <div>{quote.contact_name || "-"}</div>
-              <div className="text-gray-500">{quote.contact_phone}</div>
-            </div>
-
-            {/* Options (condensed) */}
-            {quote.options && Object.keys(quote.options).length > 0 && (
-              <div className="text-xs text-gray-900 bg-blue-50 p-2 rounded">
-                {quote.service_type === "lane" ? (
-                  <>
-                    <div><span className="text-gray-500">작업:</span> {(quote.options as { workType?: string }).workType === "new" ? "신규 도색" : "기존 덧칠"}</div>
-                    <div><span className="text-gray-500">위치:</span> {(quote.options as { locationType?: string }).locationType === "ground" ? "지상" : "지하"}</div>
-                  </>
-                ) : (
-                  <>
-                    <div><span className="text-gray-500">마감재:</span> {(quote.options as EpoxyOptions).material || "-"}</div>
-                    {(quote.options as EpoxyOptions).finish && (
-                      <div><span className="text-gray-500">광택:</span> {(quote.options as EpoxyOptions).finish}</div>
-                    )}
-                  </>
-                )}
+            
+            <div className="p-6 space-y-6">
+              {/* Type Selection */}
+              <div className="grid grid-cols-2 gap-4">
+                <button
+                  onClick={() => setAssignmentType('direct')}
+                  className={`p-4 rounded-xl border-2 flex flex-col items-center gap-2 transition-all ${ assignmentType === 'direct' 
+                      ? 'border-blue-500 bg-blue-50 text-blue-700' 
+                      : 'border-gray-200 hover:border-gray-300 text-gray-500'
+                  }`}
+                >
+                  <Building2 size={24} />
+                  <span className="font-bold">본사 직영</span>
+                </button>
+                <button
+                  onClick={() => setAssignmentType('brokerage')}
+                  className={`p-4 rounded-xl border-2 flex flex-col items-center gap-2 transition-all ${ assignmentType === 'brokerage' 
+                      ? 'border-purple-500 bg-purple-50 text-purple-700' 
+                      : 'border-gray-200 hover:border-gray-300 text-gray-500'
+                  }`}
+                >
+                  <UserCheck size={24} />
+                  <span className="font-bold">업체 매칭 (중개)</span>
+                </button>
               </div>
-            )}
 
-            {/* Notes (truncated) */}
-            {quote.notes && (
-              <div className="text-xs text-gray-900 bg-gray-50 p-2 rounded line-clamp-2">
-                <span className="text-gray-500">메모:</span> {quote.notes}
-              </div>
-            )}
+              {/* Brokerage Details */}
+              {assignmentType === 'brokerage' && (
+                <div className="space-y-4 animate-in fade-in slide-in-from-top-2">
+                  <div className="space-y-1">
+                    <label className="text-sm font-medium text-gray-700">배정 업체명 / 메모</label>
+                    <input
+                      type="text"
+                      value={brokerMemo}
+                      onChange={(e) => setBrokerMemo(e.target.value)}
+                      placeholder="예: 김반장님, 경기남부 페인트"
+                      className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-purple-500 focus:outline-none"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-sm font-medium text-gray-700">중개 수수료 (원)</label>
+                    <div className="relative">
+                      <input
+                        type="number"
+                        value={commission}
+                        onChange={(e) => setCommission(e.target.value)}
+                        className="w-full border border-gray-300 rounded-lg pl-3 pr-8 py-2 text-sm focus:ring-2 focus:ring-purple-500 focus:outline-none text-right font-medium"
+                      />
+                      <span className="absolute right-3 top-2 text-gray-500 text-sm">원</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+              
+              {assignmentType === 'direct' && (
+                <p className="text-sm text-gray-500 text-center bg-gray-50 p-3 rounded-lg">
+                  본사 직영팀이 시공하는 건으로 설정합니다.<br/>
+                  (수수료 0원 처리)
+                </p>
+              )}
+            </div>
 
-            {/* Delete button */}
-            <div className="flex justify-end pt-2 border-t border-gray-100">
+            <div className="p-4 border-t bg-gray-50 flex justify-end gap-2">
               <button
-                onClick={() => handleDelete(quote.id, (quote.options as EpoxyOptions)?.photoUrls)}
-                disabled={deletingId === quote.id || isPending}
-                className="p-2 min-w-[44px] min-h-[44px] text-red-600 hover:text-red-800 hover:bg-red-50 rounded transition-colors disabled:opacity-50 flex items-center justify-center"
-                title="삭제"
+                onClick={closeAssignmentModal}
+                className="px-4 py-2 text-gray-600 text-sm font-medium hover:bg-gray-200 rounded-lg"
               >
-                <Trash2 size={18} />
+                취소
+              </button>
+              <button
+                onClick={handleAssignmentSubmit}
+                className="px-4 py-2 bg-black text-white text-sm font-bold rounded-lg hover:bg-gray-800"
+              >
+                저장하기
               </button>
             </div>
           </div>
-        ))}
-      </div>
+        </div>
+      )}
     </>
   );
 }

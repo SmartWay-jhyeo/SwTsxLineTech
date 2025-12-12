@@ -38,6 +38,32 @@ export function JsonLd() {
       closes: "18:00",
     },
     priceRange: "KRW",
+    makesOffer: [
+      {
+        "@type": "Offer",
+        itemOffered: {
+          "@type": "Service",
+          name: "에폭시 바닥 시공",
+          description: "공장, 상가, 창고 에폭시 라이닝 및 코팅",
+        },
+      },
+      {
+        "@type": "Offer",
+        itemOffered: {
+          "@type": "Service",
+          name: "주차선 도색",
+          description: "신축/재도장 주차라인 시공 및 카스토퍼 설치",
+        },
+      },
+      {
+        "@type": "Offer",
+        itemOffered: {
+          "@type": "Service",
+          name: "건물 페인트 도장",
+          description: "내부 인테리어 도장 및 외부 방수 페인트",
+        },
+      },
+    ],
   };
 
   return (

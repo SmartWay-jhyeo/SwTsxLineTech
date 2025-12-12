@@ -177,6 +177,51 @@ export async function updateQuoteStatus(id: string, status: QuoteStatus) {
 }
 
 /**
+ * 견적 배정 정보 업데이트 (직영/중개)
+ */
+export async function updateQuoteAssignment(
+  id: string, 
+  data: { 
+    assignment_type: 'direct' | 'brokerage' | 'pending';
+    brokerage_memo?: string;
+    commission?: number;
+    status?: QuoteStatus; // 상태도 같이 변경 가능하도록
+  }
+) {
+  try {
+    const supabase = await createClient();
+
+    const updateData: any = {
+      assignment_type: data.assignment_type,
+      brokerage_memo: data.brokerage_memo,
+      commission: data.commission,
+    };
+
+    if (data.status) {
+      updateData.status = data.status;
+    }
+
+    const { error } = await supabase
+      .from("quotes")
+      .update(updateData)
+      .eq("id", id);
+
+    if (error) {
+      console.error("견적 배정 업데이트 에러:", error);
+      return { success: false, error: error.message };
+    }
+
+    return { success: true };
+  } catch (err) {
+    console.error("견적 배정 업데이트 중 예외 발생:", err);
+    return {
+      success: false,
+      error: err instanceof Error ? err.message : "알 수 없는 오류가 발생했습니다."
+    };
+  }
+}
+
+/**
  * 사진을 Supabase Storage에 업로드하고 공개 URL 반환
  */
 export async function uploadQuotePhotos(formData: FormData): Promise<{
