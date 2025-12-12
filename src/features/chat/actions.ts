@@ -1,7 +1,6 @@
 "use server";
 
-const GEMINI_API_URL =
-  "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-8b:generateContent";
+import Groq from "groq-sdk";
 
 const SYSTEM_PROMPT = `
 당신은 '시공얼마'의 AI 상담원입니다. 고객의 질문에 친절하고 전문적으로 답변해 주세요.
@@ -31,17 +30,14 @@ const SYSTEM_PROMPT = `
 - HTML 태그는 사용하지 마세요.
 `;
 
-interface ChatMessage {
-  role: "user" | "model";
-  parts: { text: string }[];
-}
+const groq = new Groq({
+  apiKey: process.env.GROQ_API_KEY,
+});
 
 export async function getChatResponse(userMessage: string) {
   try {
-    const apiKey = process.env.GEMINI_API_KEY;
-
-    if (!apiKey) {
-      console.error("Missing Gemini API Key");
+    if (!process.env.GROQ_API_KEY) {
+      console.error("Missing Groq API Key");
       return { error: "API 키가 설정되지 않았습니다." };
     }
 
@@ -50,79 +46,40 @@ export async function getChatResponse(userMessage: string) {
       return { error: "메시지는 1000자 이하로 입력해주세요." };
     }
 
-    // REST API 요청 구성 (History Injection 방식)
-    const contents: ChatMessage[] = [
-      // 시스템 프롬프트를 첫 번째 사용자 메시지로 주입
-      { role: "user", parts: [{ text: SYSTEM_PROMPT }] },
-      {
-        role: "model",
-        parts: [
-          {
-            text: "네, 알겠습니다. 시공얼마의 AI 상담원으로서 친절하게 답변하겠습니다.",
-          },
-        ],
-      },
-      // 현재 사용자 메시지
-      { role: "user", parts: [{ text: userMessage }] },
-    ];
-
-    // Gemini REST API 호출
-    console.log("Calling Gemini REST API...");
-    const response = await fetch(`${GEMINI_API_URL}?key=${apiKey}`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        contents,
-        generationConfig: {
-          temperature: 0.7,
-          topP: 0.8,
-          topK: 40,
-          maxOutputTokens: 512,
-        },
-        safetySettings: [
-          {
-            category: "HARM_CATEGORY_HARASSMENT",
-            threshold: "BLOCK_MEDIUM_AND_ABOVE",
-          },
-          {
-            category: "HARM_CATEGORY_HATE_SPEECH",
-            threshold: "BLOCK_MEDIUM_AND_ABOVE",
-          },
-          {
-            category: "HARM_CATEGORY_SEXUALLY_EXPLICIT",
-            threshold: "BLOCK_MEDIUM_AND_ABOVE",
-          },
-          {
-            category: "HARM_CATEGORY_DANGEROUS_CONTENT",
-            threshold: "BLOCK_MEDIUM_AND_ABOVE",
-          },
-        ],
-      }),
+    const chatCompletion = await groq.chat.completions.create({
+      messages: [
+        { role: "system", content: SYSTEM_PROMPT },
+        { role: "user", content: userMessage },
+      ],
+      model: "llama-3.3-70b-versatile",
+      temperature: 0.7,
+      max_tokens: 512,
+      top_p: 0.8,
     });
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error("Gemini API error:", response.status, errorText);
-
-      if (response.status === 429) {
-        return { error: "요청이 너무 많습니다. 잠시 후 다시 시도해주세요." };
-      }
-
-      return { error: `AI 응답 오류 (${response.status}): ${errorText}` };
-    }
-
-    const data = await response.json();
-
-    // 응답 추출
     const aiResponse =
-      data.candidates?.[0]?.content?.parts?.[0]?.text ||
+      chatCompletion.choices[0]?.message?.content ||
       "죄송합니다. 응답을 생성하지 못했습니다. 다시 시도해주세요.";
 
     return { content: aiResponse };
   } catch (error: unknown) {
-    console.error("Gemini API Error:", error);
+    console.error("Groq API Error:", error);
+
+    // Rate limit 에러 처리
+    if (error instanceof Groq.RateLimitError) {
+      return { error: "요청이 너무 많습니다. 잠시 후 다시 시도해주세요." };
+    }
+
+    // API 연결 에러 처리
+    if (error instanceof Groq.APIConnectionError) {
+      return { error: "네트워크 연결 오류가 발생했습니다." };
+    }
+
+    // API 에러 처리
+    if (error instanceof Groq.APIError) {
+      return { error: `AI 응답 오류: ${error.message}` };
+    }
+
     const errorMessage =
       error instanceof Error ? error.message : "Unknown error";
     return { error: `오류 상세: ${errorMessage}` };
