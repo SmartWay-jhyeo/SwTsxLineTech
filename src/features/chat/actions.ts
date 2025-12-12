@@ -69,8 +69,9 @@ export async function getChatResponse(userMessage: string) {
     const text = response.text();
 
     return { content: text };
-  } catch (error) {
+  } catch (error: any) {
     console.error("Gemini SDK Error:", error);
-    return { error: "죄송합니다. 잠시 후 다시 시도해 주세요. (AI 서버 응답 없음)" };
+    // 디버깅을 위해 상세 에러 메시지 반환
+    return { error: `오류 상세: ${error.message || error.toString()}` };
   }
 }
