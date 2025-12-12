@@ -52,7 +52,7 @@ export function Header({ className }: HeaderProps) {
             <div className="relative h-10 w-40">
               <Image
                 src="/images/logo3.png"
-                alt="라인테크"
+                alt="시공얼마"
                 fill
                 className="object-contain"
                 priority

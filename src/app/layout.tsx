@@ -19,7 +19,7 @@ export const metadata: Metadata = {
     template: "%s | 시공얼마",
   },
   description:
-    "주차장 차선도색, 바닥 에폭시, 우레탄방수, 도장공사 전문. 1분만에 무료 견적 받아보세요. 라인테크 공식 견적 시스템.",
+    "주차장 차선도색, 바닥 에폭시, 우레탄방수, 도장공사 전문. 1분만에 무료 견적 받아보세요. 시공얼마 공식 견적 시스템.",
   keywords: [
     // 차선/주차선
     "차선도색",
@@ -59,9 +59,9 @@ export const metadata: Metadata = {
     "페인트견적",
     "바닥공사비용",
   ],
-  authors: [{ name: "라인테크" }],
-  creator: "라인테크",
-  publisher: "라인테크",
+  authors: [{ name: "스마트로드" }],
+  creator: "스마트로드",
+  publisher: "스마트로드",
   alternates: {
     canonical: "/",
   },

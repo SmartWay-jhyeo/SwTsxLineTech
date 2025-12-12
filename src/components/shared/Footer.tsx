@@ -15,7 +15,8 @@ export function Footer() {
       <div className="max-w-4xl mx-auto text-center space-y-4">
         {/* Company Name & Address */}
         <div className="space-y-1">
-          <h3 className="text-white font-bold text-lg">스마트로드</h3>
+          <h3 className="text-white font-bold text-lg">라인테크</h3>
+          <p className="text-white/60 text-sm">대표 : 조형오</p>
           <p className="text-white/60 text-sm">인천광역시 남동구 은봉로297 305호</p>
         </div>
 
@@ -32,7 +33,7 @@ export function Footer() {
 
         {/* Copyright */}
         <div className="pt-4 border-t border-white/10">
-          <p className="text-white/40 text-xs">© 2024 스마트로드. All rights reserved.</p>
+          <p className="text-white/40 text-xs">© 2024 라인테크. All rights reserved.</p>
         </div>
       </div>
     </footer>

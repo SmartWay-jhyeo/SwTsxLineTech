@@ -59,7 +59,7 @@ const reviews = [
     rating: 5,
     date: "2025-09-05",
     service: "방수 공사",
-    content: "옥상 우레탄 방수 공사를 했습니다. 작년 장마 때 누수가 있어서 걱정했는데, 이번에 라인테크에서 꼼꼼하게 작업해주신 덕분에 올여름 장마는 걱정 없을 것 같네요. 바닥 갈아내는 기초 작업부터 중도, 상도 코팅까지 단계별로 사진 찍어서 보내주셔서 믿음이 갔습니다.",
+    content: "옥상 우레탄 방수 공사를 했습니다. 작년 장마 때 누수가 있어서 걱정했는데, 이번에 시공얼마에서 꼼꼼하게 작업해주신 덕분에 올여름 장마는 걱정 없을 것 같네요. 바닥 갈아내는 기초 작업부터 중도, 상도 코팅까지 단계별로 사진 찍어서 보내주셔서 믿음이 갔습니다.",
   },
   {
     id: 8,
@@ -172,7 +172,7 @@ export default function ReviewsPage() {
       <div className="max-w-5xl mx-auto">
         <div className="text-center mb-12">
           <h1 className="text-white text-3xl md:text-4xl font-bold mb-4">고객 후기</h1>
-          <p className="text-white/60">라인테크를 이용하신 고객님들의 생생한 후기입니다</p>
+          <p className="text-white/60">시공얼마를 이용하신 고객님들의 생생한 후기입니다</p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">

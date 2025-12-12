@@ -13,7 +13,7 @@ export function Chatbot() {
   const [isOpen, setIsOpen] = useState(false);
   const [step, setStep] = useState(0);
   const [messages, setMessages] = useState<Message[]>([
-    { type: "bot", content: "안녕하세요! 라인테크입니다. 무엇을 도와드릴까요?" },
+    { type: "bot", content: "안녕하세요! 시공얼마입니다. 무엇을 도와드릴까요?" },
   ]);
   const [inputValue, setInputValue] = useState("");
   const [formData, setFormData] = useState({
@@ -73,7 +73,7 @@ export function Chatbot() {
         // Reset conversation
         setTimeout(() => {
           setMessages([
-            { type: "bot", content: "안녕하세요! 라인테크입니다. 무엇을 도와드릴까요?" },
+            { type: "bot", content: "안녕하세요! 시공얼마입니다. 무엇을 도와드릴까요?" },
           ]);
           setStep(0);
           setFormData({ name: "", phone: "", message: "" });
@@ -105,7 +105,7 @@ export function Chatbot() {
     // Reset if previously completed
     if (step === 3) {
       setMessages([
-        { type: "bot", content: "안녕하세요! 라인테크입니다. 무엇을 도와드릴까요?" },
+        { type: "bot", content: "안녕하세요! 시공얼마입니다. 무엇을 도와드릴까요?" },
       ]);
       setStep(0);
       setFormData({ name: "", phone: "", message: "" });
