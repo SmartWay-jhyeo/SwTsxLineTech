@@ -6,9 +6,9 @@ import { PortfolioCategory } from "@/types";
 
 const categories: { id: PortfolioCategory; label: string }[] = [
   { id: "all", label: "전체" },
-  { id: "lane", label: "차선/주차선" },
   { id: "epoxy", label: "바닥 에폭시" },
-  { id: "paint", label: "도장공사" },
+  { id: "lane", label: "주차장 도색" },
+  { id: "paint", label: "페인트 도장" },
 ];
 
 export function CategoryFilter() {

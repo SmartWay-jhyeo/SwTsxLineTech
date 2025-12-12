@@ -8,9 +8,9 @@ export function JsonLd() {
     logo: "https://시공얼마.com/images/logo3.png",
     image: "https://시공얼마.com/images/logo3.png",
     description:
-      "주차장 차선도색, 바닥 에폭시, 우레탄방수, 도장공사 전문. 1분만에 무료 견적 받아보세요. 시공얼마 공식 견적 시스템.",
+      "주차장 도색, 바닥 에폭시, 우레탄방수, 도장공사 전문. 1분만에 무료 견적 받아보세요. 시공얼마 공식 견적 시스템.",
     telephone: "010-4806-9911",
-    email: "smartroad.jhyeo@gmail.com",
+    email: "smartroad2025@gmail.com",
     address: {
       "@type": "PostalAddress",
       streetAddress: "은봉로297 305호",
@@ -51,7 +51,7 @@ export function JsonLd() {
         "@type": "Offer",
         itemOffered: {
           "@type": "Service",
-          name: "주차선 도색",
+          name: "주차장 도색",
           description: "신축/재도장 주차라인 시공 및 카스토퍼 설치",
         },
       },

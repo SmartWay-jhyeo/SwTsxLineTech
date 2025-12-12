@@ -13,89 +13,59 @@ const notoSansKR = Noto_Sans_KR({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://시공얼마.com"),
+  metadataBase: new URL("https://linetech-landing.vercel.app"),
   title: {
-    default: "시공얼마 | 차선도색 & 바닥도장 견적",
     template: "%s | 시공얼마",
+    default: "시공얼마 | 주차장 도색 & 바닥 에폭시 견적",
   },
   description:
-    "주차장 차선도색, 바닥 에폭시, 우레탄방수, 도장공사 전문. 1분만에 무료 견적 받아보세요. 시공얼마 공식 견적 시스템.",
+    "주차장 도색, 바닥 에폭시, 우레탄방수, 도장공사 전문. 1분만에 무료 견적 받아보세요. 시공얼마 공식 견적 시스템.",
   keywords: [
-    // 차선/주차선
-    "차선도색",
+    // 주차장 도색
     "주차장도색",
     "주차선도색",
-    "주차라인시공",
     "주차선그리기",
-    "주차장라인",
     "카스토퍼",
-    
-    // 에폭시/방수
-    "에폭시시공",
-    "에폭시바닥",
-    "바닥도장",
-    "에폭시라이닝",
+    "주차장라인",
+    // 에폭시
+    "바닥에폭시",
     "에폭시코팅",
-    "우레탄방수",
-    "옥상방수",
-    "방수공사",
     "공장바닥",
-    "창고바닥",
-    "상가에폭시",
-    
-    // 도장/페인트
-    "도장공사",
+    "주차장에폭시",
+    // 도장
     "페인트시공",
-    "외벽도색",
-    "내부도색",
-    "인테리어도장",
-    "상가페인트",
-    
-    // 견적/비용
-    "시공견적",
-    "무료견적",
-    "주차장도색견적",
-    "에폭시견적",
-    "페인트견적",
-    "바닥공사비용",
+    "외벽방수",
+    "옥상방수",
+    // 지역
+    "서울",
+    "경기",
+    "인천",
   ],
-  authors: [{ name: "스마트로드" }],
-  creator: "스마트로드",
-  publisher: "스마트로드",
-  alternates: {
-    canonical: "/",
+  authors: [{ name: "시공얼마" }],
+  creator: "시공얼마",
+  publisher: "시공얼마",
+  robots: {
+    index: true,
+    follow: true,
   },
   openGraph: {
     type: "website",
     locale: "ko_KR",
-    url: "https://시공얼마.com",
+    url: "https://linetech-landing.vercel.app",
     siteName: "시공얼마",
-    title: "시공얼마 | 차선도색 & 바닥도장 무료 견적",
+    title: "시공얼마 | 주차장 도색 & 바닥 에폭시 무료 견적",
     description:
-      "주차장 차선도색, 바닥 에폭시, 우레탄방수, 도장공사 전문. 1분만에 무료 견적!",
+      "주차장 도색, 바닥 에폭시, 우레탄방수, 도장공사 전문. 1분만에 무료 견적!",
     images: [
       {
-        url: "/images/logo3.png",
-        width: 800,
-        height: 600,
-        alt: "시공얼마 로고",
+        url: "/images/bg-epoxy.jpg",
+        width: 1200,
+        height: 630,
+        alt: "시공얼마 대표 이미지",
       },
     ],
   },
-  robots: {
-    index: true,
-    follow: true,
-    googleBot: {
-      index: true,
-      follow: true,
-    },
-  },
-  verification: {
-    other: {
-      "naver-site-verification": "c08e0b1763ee8135a20e30d14d0d5feeb780184b",
-    },
-  },
-};
+}
 
 export default function Layout({
   children,

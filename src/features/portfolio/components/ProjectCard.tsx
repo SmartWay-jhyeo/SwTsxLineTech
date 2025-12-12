@@ -13,10 +13,10 @@ type ProjectCardProps = {
   className?: string;
 };
 
-const categoryLabels: Record<ServiceType, string> = {
-  lane: "차선/주차선",
+const CATEGORY_LABELS: Record<ServiceType, string> = {
   epoxy: "바닥 에폭시",
-  paint: "도장공사",
+  lane: "주차장 도색",
+  paint: "페인트 도장",
 };
 
 const categoryColors: Record<ServiceType, string> = {

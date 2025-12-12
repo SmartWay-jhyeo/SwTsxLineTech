@@ -12,7 +12,7 @@ type PricingManagerProps = {
 
 const serviceLabels: Record<string, string> = {
   epoxy: "바닥 에폭시",
-  lane: "차선/주차선",
+  lane: "주차장 도색",
   paint: "내/외부 도장",
   common: "공통",
 };

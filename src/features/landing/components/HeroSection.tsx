@@ -8,7 +8,7 @@ import type { PricingRule } from "@/features/quote/actions";
 const BACKGROUND_IMAGES = [
   "/images/epoxy/gravel_beige.jpg", // 1. 밝고 따뜻한 콩자갈 (메인)
   "/images/bg-epoxy.jpg",           // 2. 전문적인 에폭시
-  "/images/bg-lane.jpg",            // 3. 깔끔한 주차선
+  "/images/bg-lane.jpg",            // 3. 깔끔한 주차장
 ];
 
 export function HeroSection({ pricingRules }: { pricingRules: PricingRule[] }) {

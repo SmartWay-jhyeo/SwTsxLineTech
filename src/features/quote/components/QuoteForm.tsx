@@ -23,7 +23,7 @@ type QuoteFormProps = {
 // 서비스별 재료 옵션
 const materialOptions: Record<ServiceType, { id: string; label: string; description?: string }[]> = {
   lane: [
-    { id: "oil-paint", label: "유성 페인트", description: "일반적인 차선 도색용" },
+    { id: "oil-paint", label: "유성 페인트", description: "일반적인 주차장 도색용" },
     { id: "epoxy", label: "무용제 에폭시", description: "내구성이 뛰어남" },
     { id: "mma", label: "MMA 페인트", description: "빠른 건조" },
     { id: "polyurea", label: "폴리우레아 페인트", description: "최고급 내구성" },
@@ -62,7 +62,7 @@ const serviceImages: Record<ServiceType, string> = {
 
 // 서비스별 이름
 const serviceNames: Record<ServiceType, string> = {
-  lane: "차선/주차선",
+  lane: "주차장 도색",
   epoxy: "바닥 에폭시/우레탄방수",
   paint: "내/외부 도장",
 };

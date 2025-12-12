@@ -129,17 +129,16 @@ export function QuickQuoteCalculator({ pricingRules }: { pricingRules: PricingRu
             바닥 에폭시
             {activeTab === "epoxy" && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary" />}
           </button>
-          <button
-            onClick={() => setActiveTab("lane")}
-            className={cn(
-              "flex-1 py-3 text-sm font-medium transition-colors relative",
-              activeTab === "lane" ? "text-white bg-white/10" : "text-white/50 hover:text-white hover:bg-white/5"
-            )}
-          >
-            주차선 도색
-            {activeTab === "lane" && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary" />}
-          </button>
-          <button
+                  <button
+                    onClick={() => setActiveTab("lane")}
+                    className={cn(
+                      "flex-1 py-3 text-sm font-medium transition-colors relative",
+                      activeTab === "lane" ? "text-white bg-white/10" : "text-white/50 hover:text-white hover:bg-white/5"
+                    )}
+                  >
+                    주차장 도색
+                    {activeTab === "lane" && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary" />}
+                  </button>          <button
             onClick={() => setActiveTab("paint")}
             className={cn(
               "flex-1 py-3 text-sm font-medium transition-colors relative",
