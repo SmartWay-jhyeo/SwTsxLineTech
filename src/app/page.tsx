@@ -61,27 +61,25 @@ export default function Page() {
             </div>
 
             <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-               <PortfolioCard 
-                 image="/images/epoxy/color_gray_gloss.jpg"
-                 title="수원 권선구 공장 바닥"
-                 category="에폭시"
-                 price="평당 35,000원~"
-               />
-               <PortfolioCard 
-                 image="/images/bg-lane.jpg"
-                 title="화성시 신축 빌라 주차선"
-                 category="차선도색"
-                 price="최소 30만원~"
-               />
-               <PortfolioCard 
-                 image="/images/in_out_paint/outpaint.jpg"
-                 title="용인 상가 외벽 페인트"
-                 category="페인트"
-                 price="방문 견적"
-               />
-               <PortfolioCard 
+                            <PortfolioCard 
+                              image="/images/epoxy/color_gray_gloss.jpg"
+                              title="인천 송도동 오피스텔 주차장 바닥"
+                              category="에폭시"
+                              price="평당 35,000원~"
+                            />             <PortfolioCard 
+               image="/images/bg-lane.jpg"
+               title="화성시 공장 주차선"
+               category="차선도색"
+               price="최소 30만원~"
+             />
+                            <PortfolioCard 
+                              image="/images/in_out_paint/outpaint.jpg"
+                              title="전주 주택 외벽 페인트"
+                              category="페인트"
+                              price="방문 견적"
+                            />               <PortfolioCard 
                  image="/images/epoxy/self_leveling.jpg"
-                 title="동탄 카페 셀프레벨링"
+                 title="동탄 카페 셀프 레벨링"
                  category="에폭시"
                  price="평당 60,000원~"
                />
