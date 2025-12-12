@@ -17,18 +17,19 @@ export function Footer() {
         <div className="space-y-1">
           <h3 className="text-white font-bold text-lg">라인테크</h3>
           <p className="text-white/60 text-sm">대표 : 조형오</p>
-          <p className="text-white/60 text-sm">인천광역시 남동구 은봉로297 305호</p>
+          <p className="text-white/60 text-sm">경기도 남양주시 별내중앙로26, 506호</p>
         </div>
 
         {/* Contact Info */}
         <div className="space-y-1">
-          <p className="text-white/60 text-sm">전화: 010-4806-9911</p>
-          <p className="text-white/60 text-sm">이메일: smartroad.jhyeo@gmail.com</p>
+          <p className="text-white/60 text-sm">전화: 031-575-1012</p>
+          <p className="text-white/60 text-sm">이메일: linetech2012@naver.com</p>
         </div>
 
         {/* Registration Numbers */}
         <div className="space-y-1">
-          <p className="text-white/60 text-sm">사업자등록번호: 605-44-77540</p>
+          <p className="text-white/60 text-sm">사업자등록번호: 132-86-03287</p>
+          <p className="text-white/60 text-sm">법인등록번호: 284111-0101653</p>
         </div>
 
         {/* Copyright */}
