@@ -5,14 +5,17 @@ import { HeroSection } from "@/features/landing/components/HeroSection";
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
+import { getPricingRulesQuery } from "@/features/quote/queries";
 
-export default function Page() {
+export default async function Page() {
+  const pricingRules = await getPricingRulesQuery();
+
   return (
     <>
       <Header />
       <main className="min-h-screen bg-black">
         {/* 1. Hero & Calculator Section */}
-        <HeroSection />
+        <HeroSection pricingRules={pricingRules} />
 
         {/* 2. Trust/Social Proof Section */}
         <section className="py-20 bg-neutral-900 border-y border-white/5">
