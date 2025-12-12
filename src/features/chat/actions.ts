@@ -42,23 +42,14 @@ export async function getChatResponse(userMessage: string) {
       return { error: "API 키가 설정되지 않았습니다." };
     }
 
-    // Gemini Pro 모델 사용 (안정성 확보)
-    // 참고: gemini-pro는 systemInstruction을 직접 지원하지 않을 수 있으므로 프롬프트에 포함
+    // Gemini 1.5 Flash 모델 사용 (최신 표준)
     const model = genAI.getGenerativeModel({ 
-      model: "gemini-pro",
+      model: "gemini-1.5-flash",
+      systemInstruction: SYSTEM_PROMPT,
     });
 
     const chat = model.startChat({
-      history: [
-        {
-          role: "user",
-          parts: [{ text: SYSTEM_PROMPT }],
-        },
-        {
-          role: "model",
-          parts: [{ text: "네, 알겠습니다. 시공얼마의 AI 상담원으로서 친절하게 답변하겠습니다." }],
-        },
-      ],
+      history: [],
       generationConfig: {
         maxOutputTokens: 200,
       },
