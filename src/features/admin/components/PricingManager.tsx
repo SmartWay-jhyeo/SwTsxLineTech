@@ -19,6 +19,7 @@ const serviceLabels: Record<string, string> = {
 
 const categoryLabels: Record<string, string> = {
   area_base: "기본 단가 (면적별)",
+  material_base: "마감재별 기본 단가", // 신규 추가
   option: "추가 옵션",
   tier: "구간 정액",
   material: "자재비",

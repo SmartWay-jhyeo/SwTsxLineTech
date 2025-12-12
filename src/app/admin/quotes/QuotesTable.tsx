@@ -198,42 +198,42 @@ export function QuotesTable({ quotes }: { quotes: Quote[] }) {
                         </>
                       ) : (
                         <>
-                          <div><span className="text-gray-500">마감재:</span> {(quote.options as EpoxyOptions).material || "-"}</div>
+                          <div><span className="text-gray-700">마감재:</span> {(quote.options as EpoxyOptions).material || "-"}</div>
                           {(quote.options as EpoxyOptions).finish && (
-                            <div><span className="text-gray-500">광택:</span> {(quote.options as EpoxyOptions).finish}</div>
+                            <div><span className="text-gray-700">광택:</span> {(quote.options as EpoxyOptions).finish}</div>
                           )}
                           {(quote.options as EpoxyOptions).color && (
-                            <div><span className="text-gray-500">색상:</span> {(quote.options as EpoxyOptions).color}</div>
+                            <div><span className="text-gray-700">색상:</span> {(quote.options as EpoxyOptions).color}</div>
                           )}
 
                           {/* 신규 옵션들 */}
                           {(quote.options as EpoxyOptions).floorQuality && (
-                            <div><span className="text-gray-500">바닥 상태:</span> {(quote.options as EpoxyOptions).floorQuality}</div>
+                            <div><span className="text-gray-700">바닥 상태:</span> {(quote.options as EpoxyOptions).floorQuality}</div>
                           )}
                           {(quote.options as EpoxyOptions).crackCondition && (
-                            <div><span className="text-gray-500">균열 정도:</span> {(quote.options as EpoxyOptions).crackCondition}</div>
+                            <div><span className="text-gray-700">균열 정도:</span> {(quote.options as EpoxyOptions).crackCondition}</div>
                           )}
                           {(quote.options as EpoxyOptions).antiSlip && (
-                            <div><span className="text-gray-500">추가 옵션:</span> 미끄럼 방지 처리</div>
+                            <div><span className="text-gray-700">추가 옵션:</span> 미끄럼 방지 처리</div>
                           )}
                           {(quote.options as EpoxyOptions).surfaceProtection && (
-                            <div><span className="text-gray-500">추가 옵션:</span> 표면 보호막</div>
+                            <div><span className="text-gray-700">추가 옵션:</span> 표면 보호막</div>
                           )}
 
                           {(quote.options as EpoxyOptions).floorCondition && (
-                            <div><span className="text-gray-500">바닥:</span> {(quote.options as EpoxyOptions).floorCondition}</div>
+                            <div><span className="text-gray-700">바닥:</span> {(quote.options as EpoxyOptions).floorCondition}</div>
                           )}
                           {(quote.options as EpoxyOptions).selfLeveling && (
-                            <div><span className="text-gray-500">셀프레벨링:</span> 포함</div>
+                            <div><span className="text-gray-700">셀프레벨링:</span> 포함</div>
                           )}
                           {(quote.options as EpoxyOptions).location && (
-                            <div><span className="text-gray-500">장소:</span> {(quote.options as EpoxyOptions).location}</div>
+                            <div><span className="text-gray-700">장소:</span> {(quote.options as EpoxyOptions).location}</div>
                           )}
 
                           {/* 사진 표시 */}
                           {(quote.options as EpoxyOptions).photoUrls && (quote.options as EpoxyOptions).photoUrls!.length > 0 && (
                             <div className="mt-2">
-                              <span className="text-gray-500">바닥 사진:</span>
+                              <span className="text-gray-700">바닥 사진:</span>
                               <div className="flex gap-1 mt-1">
                                 {(quote.options as EpoxyOptions).photoUrls!.map((url, idx) => (
                                   <a

@@ -78,11 +78,18 @@ export function calculateEpoxyPrice(input: EpoxyQuoteInput): PriceBreakdown {
 
   // 동적 가격 로드 (fallback은 기존 상수)
   const prices = {
+    // 면적별 (참고용 혹은 기본값)
     area_under_100: getPrice(pricingRules, 'area_base', 'area_under_100', 65000),
     area_101_299: getPrice(pricingRules, 'area_base', 'area_101_299', 45000),
     area_300_499: getPrice(pricingRules, 'area_base', 'area_300_499', 40000),
     area_over_500: getPrice(pricingRules, 'area_base', 'area_over_500', 35000),
     
+    // 마감재별 기본 단가 (신규 추가)
+    base_transparent: getPrice(pricingRules, 'material_base', 'transparent_epoxy', MATERIAL_PRICES.transparent_epoxy),
+    base_solid: getPrice(pricingRules, 'material_base', 'solid_epoxy', MATERIAL_PRICES.solid_epoxy),
+    base_gravel: getPrice(pricingRules, 'material_base', 'bean_gravel', MATERIAL_PRICES.bean_gravel),
+    base_urethane: getPrice(pricingRules, 'material_base', 'urethane_waterproof', MATERIAL_PRICES.urethane_waterproof),
+
     quality_poor: getPrice(pricingRules, 'option', 'quality_poor', FLOOR_QUALITY.poor.price),
     crack_severe: getPrice(pricingRules, 'option', 'crack_severe', CRACK_CONDITION.severe.price),
     
@@ -94,17 +101,28 @@ export function calculateEpoxyPrice(input: EpoxyQuoteInput): PriceBreakdown {
     min_fee: getPrice(pricingRules, 'option', 'min_fee', MIN_SERVICE_FEE),
   };
 
-  // 1. 기본 단가 결정 (면적별 차등 가격 적용)
+  // 1. 기본 단가 결정 (마감재별 단가 우선 적용)
   let basePricePerM2: number;
-  if (materialId === "solid_epoxy" && floorCondition) {
-    // 레거시: 칼라 에폭시는 바닥 상태에 따라 단가 결정 (DB 반영 안됨, 레거시 유지)
-    basePricePerM2 = FLOOR_CONDITION_PRICES[floorCondition];
-  } else {
-    // 신규: 면적별 차등 가격 (동적 가격 적용)
-    if (area >= 500) basePricePerM2 = prices.area_over_500;
-    else if (area >= 300) basePricePerM2 = prices.area_300_499;
-    else if (area >= 101) basePricePerM2 = prices.area_101_299;
-    else basePricePerM2 = prices.area_under_100;
+
+  switch (materialId) {
+    case "transparent_epoxy":
+      basePricePerM2 = prices.base_transparent;
+      break;
+    case "solid_epoxy":
+      basePricePerM2 = prices.base_solid;
+      break;
+    case "bean_gravel":
+      basePricePerM2 = prices.base_gravel;
+      break;
+    case "urethane_waterproof":
+      basePricePerM2 = prices.base_urethane;
+      break;
+    default:
+      // Fallback: 면적별 차등 가격 (혹은 알 수 없는 마감재)
+      if (area >= 500) basePricePerM2 = prices.area_over_500;
+      else if (area >= 300) basePricePerM2 = prices.area_300_499;
+      else if (area >= 101) basePricePerM2 = prices.area_101_299;
+      else basePricePerM2 = prices.area_under_100;
   }
 
   // 2. 기본 시공비
