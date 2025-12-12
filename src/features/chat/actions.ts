@@ -35,7 +35,11 @@ const SYSTEM_PROMPT = `
 
 export async function getChatResponse(userMessage: string) {
   try {
+    console.log("Attempting to call Gemini API...");
+    console.log("API Key loaded:", apiKey ? `Yes (${apiKey.substring(0, 4)}...)` : "No");
+
     if (!apiKey) {
+      console.error("Missing Gemini API Key in environment variables.");
       return { error: "API 키가 설정되지 않았습니다." };
     }
 
@@ -43,6 +47,8 @@ export async function getChatResponse(userMessage: string) {
       model: "gemini-1.5-flash",
       systemInstruction: SYSTEM_PROMPT,
     });
+
+    console.log("Sending message to Gemini:", userMessage);
 
     const chat = model.startChat({
       history: [],
@@ -54,10 +60,12 @@ export async function getChatResponse(userMessage: string) {
     const result = await chat.sendMessage(userMessage);
     const response = result.response;
     const text = response.text();
+    
+    console.log("Gemini Response:", text);
 
     return { content: text };
   } catch (error) {
-    console.error("Gemini API Error:", error);
-    return { error: "죄송합니다. 잠시 후 다시 시도해 주세요." };
+    console.error("Gemini API Error Detail:", error);
+    return { error: "죄송합니다. 잠시 후 다시 시도해 주세요. (서버 에러)" };
   }
 }
