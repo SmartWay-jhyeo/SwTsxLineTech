@@ -171,7 +171,7 @@ export function QuotesTable({ quotes }: { quotes: Quote[] }) {
                   
                   {/* options 표시 */}
                   {quote.options && Object.keys(quote.options).length > 0 && (
-                    <div className="text-xs bg-blue-50 p-2 rounded mt-1">
+                    <div className="text-xs bg-blue-50 text-gray-900 p-2 rounded mt-1">
                       {(quote.options as any).isSimpleLead ? (
                          // 간편 문자 문의인 경우
                          <div className="flex items-start gap-2">
