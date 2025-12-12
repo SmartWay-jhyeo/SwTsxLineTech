@@ -42,14 +42,40 @@ export async function getChatResponse(userMessage: string) {
       return { error: "API 키가 설정되지 않았습니다." };
     }
 
-    // Gemini 1.5 Flash 모델 사용 (최신 표준)
+    // [DEBUG] 사용 가능한 모델 목록 확인
+    // SDK 버전에 따라 다를 수 있으므로 try-catch로 감싸서 확인
+    /*
+    try {
+       // Note: The SDK might not expose listModels directly on the main instance easily in all versions,
+       // but let's try a direct fetch if SDK fails, or just rely on standard names.
+       // For now, let's try 'gemini-1.0-pro' which is often the fallback for 'gemini-pro'
+    } catch (e) {
+       console.log("List models check failed", e);
+    }
+    */
+   
+    // 404 해결을 위한 모델명 변경 시도: 'gemini-1.5-flash-latest' 또는 'gemini-1.0-pro'
+    // 현재 에러 메시지로 보아 1.5 flash가 v1beta에서 안 잡히는 듯함.
+    // 가장 안전한 'gemini-1.0-pro'로 시도.
+    console.log("Using model: gemini-1.0-pro");
     const model = genAI.getGenerativeModel({ 
-      model: "gemini-1.5-flash",
-      systemInstruction: SYSTEM_PROMPT,
+      model: "gemini-1.0-pro", 
+      // gemini-1.0-pro may not support systemInstruction in v1beta SDK depending on version.
+      // If it fails, we will revert to prompt injection.
+      // But let's try this standard first.
     });
 
     const chat = model.startChat({
-      history: [],
+      history: [
+          {
+            role: "user",
+            parts: [{ text: SYSTEM_PROMPT }],
+          },
+          {
+            role: "model",
+            parts: [{ text: "네, 알겠습니다. 시공얼마의 AI 상담원으로서 친절하게 답변하겠습니다." }],
+          },
+      ],
       generationConfig: {
         maxOutputTokens: 200,
       },
